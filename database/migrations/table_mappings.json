@@ -1,0 +1,527 @@
+{
+  "tables": {
+    "PRODUCTS": {
+      "description": "Product metadata table",
+      "primary_key": "PRODUCT_ID",
+      "columns": {
+        "PRODUCT_ID": {
+          "oracle_type": "NUMBER(10)",
+          "db2_type": "DECIMAL(10,0)",
+          "nullable": false,
+          "transformation": "string_to_integer",
+          "validation": {
+            "type": "integer",
+            "min": 1,
+            "max": 9999999999
+          }
+        },
+        "NAME": {
+          "oracle_type": "VARCHAR2(255)",
+          "db2_type": "VARCHAR(255)",
+          "nullable": false,
+          "transformation": "trim_string",
+          "validation": {
+            "type": "string",
+            "max_length": 255,
+            "allow_empty": false
+          },
+          "default_generator": "generate_default_name"
+        },
+        "PRICE": {
+          "oracle_type": "NUMBER(10,2)",
+          "db2_type": "DECIMAL(10,2)",
+          "nullable": true,
+          "transformation": "string_to_decimal",
+          "validation": {
+            "type": "decimal",
+            "precision": 10,
+            "scale": 2,
+            "min": 0,
+            "max": 99999999.99
+          }
+        }
+      }
+    },
+    "SYNERGIES": {
+      "description": "Product synergy relationships table",
+      "primary_key": "SYNERGY_ID",
+      "foreign_keys": {
+        "PRODUCT_ID_1": "PRODUCTS.PRODUCT_ID",
+        "PRODUCT_ID_2": "PRODUCTS.PRODUCT_ID"
+      },
+      "columns": {
+        "SYNERGY_ID": {
+          "oracle_type": "NUMBER(10)",
+          "db2_type": "DECIMAL(10,0)",
+          "nullable": false,
+          "transformation": "string_to_integer",
+          "validation": {
+            "type": "integer",
+            "min": 1,
+            "max": 9999999999
+          }
+        },
+        "PRODUCT_ID_1": {
+          "oracle_type": "NUMBER(10)",
+          "db2_type": "DECIMAL(10,0)",
+          "nullable": false,
+          "transformation": "string_to_integer",
+          "validation": {
+            "type": "integer",
+            "min": 1,
+            "max": 9999999999
+          }
+        },
+        "PRODUCT_ID_2": {
+          "oracle_type": "NUMBER(10)",
+          "db2_type": "DECIMAL(10,0)",
+          "nullable": false,
+          "transformation": "string_to_integer",
+          "validation": {
+            "type": "integer",
+            "min": 1,
+            "max": 9999999999
+          }
+        },
+        "SYNERGY_SCORE": {
+          "oracle_type": "NUMBER(5,2)",
+          "db2_type": "DECIMAL(5,2)",
+          "nullable": false,
+          "transformation": "string_to_decimal",
+          "validation": {
+            "type": "decimal",
+            "precision": 5,
+            "scale": 2,
+            "min": 0,
+            "max": 100
+          }
+        }
+      }
+    },
+    "DATATYPE_TEST": {
+      "description": "Comprehensive Oracle to DB2 data type testing table",
+      "primary_key": "TEST_ID",
+      "columns": {
+        "TEST_ID": {
+          "oracle_type": "NUMBER(10)",
+          "db2_type": "DECIMAL(10,0)",
+          "nullable": false,
+          "transformation": "string_to_integer",
+          "validation": {
+            "type": "integer",
+            "min": 1,
+            "max": 9999999999
+          }
+        },
+        "NUM_INTEGER": {
+          "oracle_type": "INTEGER",
+          "db2_type": "INTEGER",
+          "nullable": true,
+          "transformation": "string_to_integer",
+          "validation": {
+            "type": "integer"
+          }
+        },
+        "NUM_SMALLINT": {
+          "oracle_type": "SMALLINT",
+          "db2_type": "SMALLINT",
+          "nullable": true,
+          "transformation": "string_to_integer",
+          "validation": {
+            "type": "integer"
+          }
+        },
+        "NUM_DECIMAL": {
+          "oracle_type": "NUMBER(15,4)",
+          "db2_type": "DECIMAL(15,4)",
+          "nullable": true,
+          "transformation": "string_to_decimal",
+          "validation": {
+            "type": "decimal",
+            "precision": 15,
+            "scale": 4
+          }
+        },
+        "NUM_FLOAT": {
+          "oracle_type": "FLOAT",
+          "db2_type": "DOUBLE",
+          "nullable": true,
+          "transformation": "string_to_decimal",
+          "validation": {
+            "type": "decimal"
+          }
+        },
+        "CHAR_FIXED": {
+          "oracle_type": "CHAR(10)",
+          "db2_type": "CHAR(10)",
+          "nullable": true,
+          "transformation": "trim_string",
+          "validation": {
+            "type": "string",
+            "max_length": 10
+          }
+        },
+        "CHAR_VAR": {
+          "oracle_type": "VARCHAR2(100)",
+          "db2_type": "VARCHAR(100)",
+          "nullable": true,
+          "transformation": "trim_string",
+          "validation": {
+            "type": "string",
+            "max_length": 100
+          }
+        },
+        "DATE_FIELD": {
+          "oracle_type": "DATE",
+          "db2_type": "TIMESTAMP",
+          "nullable": true,
+          "transformation": "string_to_timestamp",
+          "validation": {
+            "type": "timestamp"
+          }
+        },
+        "TIMESTAMP_FIELD": {
+          "oracle_type": "TIMESTAMP",
+          "db2_type": "TIMESTAMP",
+          "nullable": true,
+          "transformation": "string_to_timestamp",
+          "validation": {
+            "type": "timestamp"
+          }
+        },
+        "CLOB_FIELD": {
+          "oracle_type": "CLOB",
+          "db2_type": "CLOB",
+          "nullable": true,
+          "transformation": "trim_string",
+          "validation": {
+            "type": "string"
+          }
+        },
+        "BLOB_FIELD": {
+          "oracle_type": "BLOB",
+          "db2_type": "BLOB",
+          "nullable": true,
+          "transformation": "pass_through",
+          "validation": {
+            "type": "binary"
+          }
+        }
+      }
+    },
+    "ORACLE_DATATYPE_COMPREHENSIVE": {
+      "description": "Comprehensive Oracle to DB2 data type mapping test table - All major Oracle types",
+      "primary_key": "ID",
+      "columns": {
+        "ID": {
+          "oracle_type": "NUMBER(10)",
+          "db2_type": "DECIMAL(10,0)",
+          "nullable": false,
+          "transformation": "string_to_integer",
+          "validation": {
+            "type": "integer"
+          }
+        },
+        "NUM_NO_PRECISION": {
+          "oracle_type": "NUMBER",
+          "db2_type": "DECIMAL(31,0)",
+          "nullable": true,
+          "transformation": "string_to_decimal",
+          "validation": {
+            "type": "decimal"
+          },
+          "notes": "NUMBER without precision defaults to DECIMAL(31,0)"
+        },
+        "NUM_WITH_PRECISION": {
+          "oracle_type": "NUMBER(10)",
+          "db2_type": "DECIMAL(10,0)",
+          "nullable": true,
+          "transformation": "string_to_integer",
+          "validation": {
+            "type": "integer"
+          }
+        },
+        "NUM_WITH_SCALE": {
+          "oracle_type": "NUMBER(10,2)",
+          "db2_type": "DECIMAL(10,2)",
+          "nullable": true,
+          "transformation": "string_to_decimal",
+          "validation": {
+            "type": "decimal",
+            "precision": 10,
+            "scale": 2
+          }
+        },
+        "INT_TYPE": {
+          "oracle_type": "INTEGER",
+          "db2_type": "INTEGER",
+          "nullable": true,
+          "transformation": "string_to_integer",
+          "validation": {
+            "type": "integer"
+          }
+        },
+        "SMALLINT_TYPE": {
+          "oracle_type": "SMALLINT",
+          "db2_type": "SMALLINT",
+          "nullable": true,
+          "transformation": "string_to_integer",
+          "validation": {
+            "type": "integer"
+          }
+        },
+        "FLOAT_TYPE": {
+          "oracle_type": "FLOAT",
+          "db2_type": "DOUBLE",
+          "nullable": true,
+          "transformation": "string_to_decimal",
+          "validation": {
+            "type": "decimal"
+          }
+        },
+        "FLOAT_WITH_PRECISION": {
+          "oracle_type": "FLOAT(126)",
+          "db2_type": "DOUBLE",
+          "nullable": true,
+          "transformation": "string_to_decimal",
+          "validation": {
+            "type": "decimal"
+          }
+        },
+        "BINARY_FLOAT_TYPE": {
+          "oracle_type": "BINARY_FLOAT",
+          "db2_type": "REAL",
+          "nullable": true,
+          "transformation": "string_to_decimal",
+          "validation": {
+            "type": "decimal"
+          },
+          "notes": "32-bit floating point"
+        },
+        "BINARY_DOUBLE_TYPE": {
+          "oracle_type": "BINARY_DOUBLE",
+          "db2_type": "DOUBLE",
+          "nullable": true,
+          "transformation": "string_to_decimal",
+          "validation": {
+            "type": "decimal"
+          },
+          "notes": "64-bit floating point"
+        },
+        "CHAR_TYPE": {
+          "oracle_type": "CHAR(50)",
+          "db2_type": "CHAR(50)",
+          "nullable": true,
+          "transformation": "trim_string",
+          "validation": {
+            "type": "string",
+            "max_length": 50
+          }
+        },
+        "VARCHAR_TYPE": {
+          "oracle_type": "VARCHAR(100)",
+          "db2_type": "VARCHAR(100)",
+          "nullable": true,
+          "transformation": "trim_string",
+          "validation": {
+            "type": "string",
+            "max_length": 100
+          }
+        },
+        "VARCHAR2_TYPE": {
+          "oracle_type": "VARCHAR2(200)",
+          "db2_type": "VARCHAR(200)",
+          "nullable": true,
+          "transformation": "trim_string",
+          "validation": {
+            "type": "string",
+            "max_length": 200
+          }
+        },
+        "NCHAR_TYPE": {
+          "oracle_type": "NCHAR(25)",
+          "db2_type": "GRAPHIC(25)",
+          "nullable": true,
+          "transformation": "trim_string",
+          "validation": {
+            "type": "string",
+            "max_length": 25
+          },
+          "notes": "National character set - fixed length"
+        },
+        "NVARCHAR2_TYPE": {
+          "oracle_type": "NVARCHAR2(100)",
+          "db2_type": "VARGRAPHIC(100)",
+          "nullable": true,
+          "transformation": "trim_string",
+          "validation": {
+            "type": "string",
+            "max_length": 100
+          },
+          "notes": "National character set - variable length"
+        },
+        "DATE_TYPE": {
+          "oracle_type": "DATE",
+          "db2_type": "TIMESTAMP",
+          "nullable": true,
+          "transformation": "string_to_timestamp",
+          "validation": {
+            "type": "timestamp"
+          },
+          "notes": "Oracle DATE includes time, DB2 DATE does not"
+        },
+        "TIMESTAMP_TYPE": {
+          "oracle_type": "TIMESTAMP",
+          "db2_type": "TIMESTAMP",
+          "nullable": true,
+          "transformation": "string_to_timestamp",
+          "validation": {
+            "type": "timestamp"
+          }
+        },
+        "TIMESTAMP_PRECISION": {
+          "oracle_type": "TIMESTAMP(6)",
+          "db2_type": "TIMESTAMP(6)",
+          "nullable": true,
+          "transformation": "string_to_timestamp",
+          "validation": {
+            "type": "timestamp"
+          },
+          "notes": "Fractional seconds precision"
+        },
+        "TIMESTAMP_TZ": {
+          "oracle_type": "TIMESTAMP WITH TIME ZONE",
+          "db2_type": "TIMESTAMP",
+          "nullable": true,
+          "transformation": "string_to_timestamp",
+          "validation": {
+            "type": "timestamp"
+          },
+          "notes": "Time zone info will be lost in DB2"
+        },
+        "TIMESTAMP_LTZ": {
+          "oracle_type": "TIMESTAMP WITH LOCAL TIME ZONE",
+          "db2_type": "TIMESTAMP",
+          "nullable": true,
+          "transformation": "string_to_timestamp",
+          "validation": {
+            "type": "timestamp"
+          },
+          "notes": "Local time zone info will be lost in DB2"
+        },
+        "INTERVAL_YM": {
+          "oracle_type": "INTERVAL YEAR TO MONTH",
+          "db2_type": "VARCHAR(30)",
+          "nullable": true,
+          "transformation": "trim_string",
+          "validation": {
+            "type": "string",
+            "max_length": 30
+          },
+          "notes": "Stored as string in DB2"
+        },
+        "INTERVAL_DS": {
+          "oracle_type": "INTERVAL DAY TO SECOND",
+          "db2_type": "VARCHAR(30)",
+          "nullable": true,
+          "transformation": "trim_string",
+          "validation": {
+            "type": "string",
+            "max_length": 30
+          },
+          "notes": "Stored as string in DB2"
+        },
+        "RAW_TYPE": {
+          "oracle_type": "RAW(100)",
+          "db2_type": "VARCHAR(100) FOR BIT DATA",
+          "nullable": true,
+          "transformation": "pass_through",
+          "validation": {
+            "type": "binary"
+          },
+          "notes": "Binary data up to 2000 bytes"
+        },
+        "CLOB_TYPE": {
+          "oracle_type": "CLOB",
+          "db2_type": "CLOB",
+          "nullable": true,
+          "transformation": "trim_string",
+          "validation": {
+            "type": "string"
+          },
+          "notes": "Character Large Object"
+        },
+        "NCLOB_TYPE": {
+          "oracle_type": "NCLOB",
+          "db2_type": "DBCLOB",
+          "nullable": true,
+          "transformation": "trim_string",
+          "validation": {
+            "type": "string"
+          },
+          "notes": "National Character Large Object"
+        },
+        "BLOB_TYPE": {
+          "oracle_type": "BLOB",
+          "db2_type": "BLOB",
+          "nullable": true,
+          "transformation": "pass_through",
+          "validation": {
+            "type": "binary"
+          },
+          "notes": "Binary Large Object"
+        },
+        "ROWID_TYPE": {
+          "oracle_type": "ROWID",
+          "db2_type": "VARCHAR(18)",
+          "nullable": true,
+          "transformation": "trim_string",
+          "validation": {
+            "type": "string",
+            "max_length": 18
+          },
+          "notes": "Oracle ROWID has no direct DB2 equivalent"
+        },
+        "UROWID_TYPE": {
+          "oracle_type": "UROWID",
+          "db2_type": "VARCHAR(4000)",
+          "nullable": true,
+          "transformation": "trim_string",
+          "validation": {
+            "type": "string",
+            "max_length": 4000
+          },
+          "notes": "Universal ROWID"
+        }
+      }
+    }
+  },
+  "transformation_rules": {
+    "string_to_integer": {
+      "description": "Convert string representation to integer",
+      "steps": ["trim", "validate_numeric", "convert_to_int"]
+    },
+    "string_to_decimal": {
+      "description": "Convert string to decimal with precision",
+      "steps": ["trim", "handle_empty_as_null", "validate_numeric", "convert_to_decimal", "round_to_scale"]
+    },
+    "trim_string": {
+      "description": "Trim whitespace and normalize",
+      "steps": ["trim", "handle_empty_as_null", "validate_length"]
+    },
+    "string_to_timestamp": {
+      "description": "Convert string to timestamp",
+      "steps": ["trim", "handle_empty_as_null", "parse_timestamp"]
+    },
+    "pass_through": {
+      "description": "Pass value through without transformation",
+      "steps": ["no_transformation"]
+    }
+  },
+  "data_quality_rules": {
+    "empty_string_handling": "convert_to_null",
+    "whitespace_handling": "trim_all",
+    "null_representation": null,
+    "default_value_strategy": "use_generator_or_skip"
+  }
+}

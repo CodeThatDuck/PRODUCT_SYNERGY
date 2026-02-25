@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  db2:
+    image: docker.io/ibmcom/db2
+    platform: linux/amd64
+    container_name: product-synergy-db2
+    restart: unless-stopped
+    privileged: true
+    # Added extra capacity for DB2 to handle the Mac emulation
+    shm_size: '256m' 
+
+    ports:
+      - "5001:50000"  # Map host port 5001 to container port 50000 (DB2 default)
+
+    environment:
+      LICENSE: accept
+      DB2INSTANCE: db2inst1
+      DB2INST1_PASSWORD: password
+      DBNAME: proddb  # Changed from productdb (9 chars) to proddb (6 chars)
+      BLU: "false"
+      ENABLE_ORACLE_COMPATIBILITY: "true"
+      # Additional setting to help with restricted environments
+      PERSISTENT_HOME: "false" 
+
+    volumes:
+      - db2_data:/database
+
+    networks:
+      - product-synergy
+
+volumes:
+  db2_data:
+
+networks:
+  product-synergy:
+    external: true

@@ -1,0 +1,61 @@
+{
+  "oracle_to_db2_types": {
+    "numeric_types": {
+      "NUMBER": "DECIMAL(31,0)",
+      "NUMBER(p)": "DECIMAL(p,0)",
+      "NUMBER(p,s)": "DECIMAL(p,s)",
+      "INTEGER": "INTEGER",
+      "INT": "INTEGER",
+      "SMALLINT": "SMALLINT",
+      "FLOAT": "DOUBLE",
+      "FLOAT(p)": "DOUBLE",
+      "BINARY_FLOAT": "REAL",
+      "BINARY_DOUBLE": "DOUBLE",
+      "DECIMAL": "DECIMAL",
+      "DECIMAL(p,s)": "DECIMAL(p,s)",
+      "NUMERIC": "DECIMAL",
+      "NUMERIC(p,s)": "DECIMAL(p,s)"
+    },
+    "character_types": {
+      "CHAR": "CHAR(1)",
+      "CHAR(n)": "CHAR(n)",
+      "VARCHAR": "VARCHAR(1)",
+      "VARCHAR(n)": "VARCHAR(n)",
+      "VARCHAR2(n)": "VARCHAR(n)",
+      "NCHAR(n)": "GRAPHIC(n)",
+      "NVARCHAR2(n)": "VARGRAPHIC(n)",
+      "LONG": "CLOB(2G)",
+      "CLOB": "CLOB",
+      "NCLOB": "DBCLOB"
+    },
+    "date_time_types": {
+      "DATE": "TIMESTAMP",
+      "TIMESTAMP": "TIMESTAMP",
+      "TIMESTAMP(p)": "TIMESTAMP(p)",
+      "TIMESTAMP WITH TIME ZONE": "TIMESTAMP",
+      "TIMESTAMP WITH LOCAL TIME ZONE": "TIMESTAMP",
+      "INTERVAL YEAR TO MONTH": "VARCHAR(30)",
+      "INTERVAL DAY TO SECOND": "VARCHAR(30)"
+    },
+    "binary_types": {
+      "RAW(n)": "VARCHAR(n) FOR BIT DATA",
+      "LONG RAW": "BLOB(2G)",
+      "BLOB": "BLOB",
+      "BFILE": "BLOB"
+    },
+    "special_types": {
+      "ROWID": "VARCHAR(18)",
+      "UROWID": "VARCHAR(4000)"
+    }
+  },
+  "conversion_notes": {
+    "NUMBER": "Oracle NUMBER without precision defaults to DECIMAL(31,0) in DB2",
+    "VARCHAR2": "Oracle VARCHAR2 is equivalent to DB2 VARCHAR",
+    "DATE": "Oracle DATE includes time, DB2 DATE does not. Use TIMESTAMP in DB2",
+    "TIMESTAMP": "Both support similar precision",
+    "CLOB": "Both support large character objects similarly",
+    "BLOB": "Both support large binary objects similarly",
+    "RAW": "Use VARCHAR FOR BIT DATA in DB2",
+    "ROWID": "Oracle ROWID has no direct equivalent, use VARCHAR"
+  }
+}

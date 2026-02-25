@@ -1,0 +1,7 @@
+# Oracle to DB2 Migration Tool - Python Dependencies
+
+# IBM DB2 Driver
+ibm_db>=3.1.0
+
+# Core dependencies (usually included with Python)
+# No additional packages required - uses only standard library
