@@ -29,6 +29,7 @@ A clean, JSON-driven tool for migrating Oracle databases to IBM DB2 with automat
 - **🔄 Automatic Type Conversion**: 28+ Oracle to DB2 data type mappings
 - **🏗️ Schema Cloning**: Creates DB2 tables from JSON configuration
 - **📊 Data Migration**: Transforms and loads data with validation
+- **🗺️ Advanced Data Mapper**: 13 transformations, 9 validation types, statistics tracking
 - **🔗 Relationship Handling**: Automatic foreign keys and indexes
 - **✅ Comprehensive Testing**: End-to-end test suite included
 - **📝 SQL Generation**: Produces reference SQL files for both databases
@@ -392,6 +393,94 @@ PRODUCT_SYNERGY/
 ├── requirements.txt                     # Python dependencies
 ├── podman-compose.yml                   # Container configuration
 ├── .gitignore                           # Git ignore rules
+---
+
+## 🗺️ Data Mapper Utility
+
+### Overview
+
+The **DataMapper** is an advanced utility for comprehensive data transformation and validation during migration. It provides a reusable framework for mapping Oracle data to DB2 format.
+
+### Key Features
+
+- **13 Built-in Transformations**: String, numeric, date, and specialized transformations
+- **9 Validation Types**: Comprehensive data quality checks
+- **Statistics Tracking**: Monitor transformation success rates
+- **Extensible**: Easy to add custom transformations and validations
+- **Type-Safe**: Handles edge cases and null values gracefully
+
+### Quick Example
+
+```python
+from scripts.data_mapper import DataMapper
+
+# Initialize mapper
+mapper = DataMapper()
+
+# Map a single row
+source_row = {
+    "PRODUCT_ID": "1001",
+    "NAME": "  Gaming Laptop  ",
+    "PRICE": "1299.99"
+}
+
+mapped_row = mapper.map_row(source_row, "PRODUCTS")
+# Result: {'PRODUCT_ID': 1001, 'NAME': 'Gaming Laptop', 'PRICE': Decimal('1299.99')}
+
+# Map multiple rows
+mapped_rows = mapper.map_table_data(all_rows, "PRODUCTS", validate=True)
+
+# View statistics
+mapper.print_statistics()
+```
+
+### Available Transformations
+
+| Transformation | Description | Example |
+|---------------|-------------|---------|
+| `string_to_integer` | Convert string to integer | `"1001"` → `1001` |
+| `string_to_decimal` | Convert to decimal with precision | `"99.99"` → `Decimal('99.99')` |
+| `trim_string` | Remove whitespace | `"  text  "` → `"text"` |
+| `string_to_timestamp` | Parse timestamp | `"2024-01-01"` → `datetime` |
+| `uppercase` | Convert to uppercase | `"test"` → `"TEST"` |
+| `lowercase` | Convert to lowercase | `"TEST"` → `"test"` |
+| `normalize_phone` | Extract digits from phone | `"(555) 123-4567"` → `"5551234567"` |
+| `normalize_email` | Normalize email format | `"User@Example.COM"` → `"user@example.com"` |
+| `string_to_boolean` | Convert to boolean | `"true"` → `True` |
+| `remove_special_chars` | Remove special characters | `"Test@123"` → `"Test123"` |
+| `pad_string` | Pad to length | `"ABC"` → `"ABC       "` |
+| `truncate_string` | Truncate to max length | Long text → First N chars |
+| `pass_through` | No transformation | Value unchanged |
+
+### Available Validations
+
+| Validation | Description | Configuration |
+|-----------|-------------|---------------|
+| `integer` | Validate integer with min/max | `{"type": "integer", "min": 1, "max": 999}` |
+| `decimal` | Validate decimal with precision | `{"type": "decimal", "precision": 10, "scale": 2}` |
+| `string` | Validate string length/pattern | `{"type": "string", "max_length": 255}` |
+| `timestamp` | Validate date range | `{"type": "timestamp", "min_date": "2020-01-01"}` |
+| `email` | Validate email format | `{"type": "email"}` |
+| `phone` | Validate phone length | `{"type": "phone", "min_length": 10}` |
+| `url` | Validate URL format | `{"type": "url"}` |
+| `binary` | Validate binary data | `{"type": "binary"}` |
+| `range` | Validate numeric range | `{"type": "range", "min": 0, "max": 100}` |
+
+### Testing the Mapper
+
+```bash
+# Run comprehensive test suite
+python3 tests/test_data_mapper.py
+
+# Run standalone example
+python3 scripts/data_mapper.py
+```
+
+### Complete Documentation
+
+For detailed usage, examples, and API reference, see:
+- **[Data Mapper Guide](docs/DATA_MAPPER_GUIDE.md)** - Complete documentation with examples
+
 └── README.md                            # This file
 ```
 

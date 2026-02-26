@@ -1,4 +1,4 @@
-import ibm_db
+import ibm_db  # type: ignore
 import sys
 
 # Connection string using the new 'proddb' name with connection timeout
@@ -38,14 +38,14 @@ def run_phase_0_validation():
         # Query the log table we created in the bash step
         print("\n[2/3] Querying SYNERGY_LOG table...")
         sql = "SELECT EVENT_NAME, STATUS FROM SYNERGY_LOG"
-        stmt = ibm_db.exec_immediate(conn, sql)
-        row = ibm_db.fetch_both(stmt)
+        stmt = ibm_db.exec_immediate(conn, sql)  # type: ignore
+        row = ibm_db.fetch_both(stmt)  # type: ignore
 
         print("\n[3/3] Validating data...")
         if row:
             print(f"✅ Database Data Verified")
-            print(f"   Event: {row['EVENT_NAME']}")
-            print(f"   Status: {row['STATUS']}")
+            print(f"   Event: {row['EVENT_NAME']}")  # type: ignore
+            print(f"   Status: {row['STATUS']}")  # type: ignore
             print("\n" + "=" * 60)
             print("✅ PHASE 0 COMPLETE: SYSTEM IS READY FOR SYNERGY")
             print("=" * 60)
@@ -55,9 +55,15 @@ def run_phase_0_validation():
             print("\nTroubleshooting: Run setup_db.sh to initialize the database")
             return False
         
-    except ibm_db.Error as e:
+    except Exception as e:
+        error_msg = str(e)
+        if "SQL0204N" in error_msg or "undefined name" in error_msg:
+            print(f"\n⚠️  SYNERGY_LOG table does not exist yet")
+            print(f"   This is expected for a fresh database")
+            print("\nTroubleshooting: Run setup_db.sh to initialize the database")
+            return False
         print(f"\n❌ DB2 Connection Error:")
-        print(f"   {str(e)}")
+        print(f"   {error_msg}")
         print("\nTroubleshooting steps:")
         print("1. Verify container is running:")
         print("   podman ps | grep db2")
@@ -66,12 +72,6 @@ def run_phase_0_validation():
         print("3. Verify database exists:")
         print("   podman exec product-synergy-db2 su - db2inst1 -c 'db2 list db directory'")
         print("4. Check if DB2 is fully initialized (may take 2-3 minutes after container start)")
-        return False
-        
-    except Exception as e:
-        print(f"\n❌ Unexpected Error:")
-        print(f"   {str(e)}")
-        print("\nTip: Ensure the database creation step finished successfully.")
         return False
         
     finally:

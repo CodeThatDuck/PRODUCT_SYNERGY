@@ -1,0 +1,151 @@
+{
+  "PRODUCTS": [
+    {
+      "PRODUCT_ID": 1001,
+      "NAME": "Gaming Laptop Pro",
+      "PRICE": "1299.99"
+    },
+    {
+      "PRODUCT_ID": 1002,
+      "NAME": "Wireless Mouse Elite",
+      "PRICE": "49.95"
+    },
+    {
+      "PRODUCT_ID": 1003,
+      "NAME": "Mechanical Keyboard RGB",
+      "PRICE": "129.00"
+    },
+    {
+      "PRODUCT_ID": 1004,
+      "NAME": "4K Monitor Ultra",
+      "PRICE": "599.99"
+    },
+    {
+      "PRODUCT_ID": 1005,
+      "NAME": "USB-C Hub",
+      "PRICE": "79.99"
+    }
+  ],
+  "SYNERGIES": [
+    {
+      "SYNERGY_ID": 2001,
+      "PRODUCT_ID_1": 1001,
+      "PRODUCT_ID_2": 1002,
+      "SYNERGY_SCORE": "85.50"
+    },
+    {
+      "SYNERGY_ID": 2002,
+      "PRODUCT_ID_1": 1001,
+      "PRODUCT_ID_2": 1003,
+      "SYNERGY_SCORE": "90.00"
+    },
+    {
+      "SYNERGY_ID": 2003,
+      "PRODUCT_ID_1": 1001,
+      "PRODUCT_ID_2": 1004,
+      "SYNERGY_SCORE": "95.00"
+    },
+    {
+      "SYNERGY_ID": 2004,
+      "PRODUCT_ID_1": 1002,
+      "PRODUCT_ID_2": 1003,
+      "SYNERGY_SCORE": "75.00"
+    },
+    {
+      "SYNERGY_ID": 2005,
+      "PRODUCT_ID_1": 1001,
+      "PRODUCT_ID_2": 1005,
+      "SYNERGY_SCORE": "80.00"
+    }
+  ],
+  "DATATYPE_TEST": [
+    {
+      "TEST_ID": 3001,
+      "NUM_INTEGER": 12345,
+      "NUM_SMALLINT": 100,
+      "NUM_DECIMAL": "12345.6789",
+      "NUM_FLOAT": "3.14159",
+      "CHAR_FIXED": "FIXED",
+      "CHAR_VAR": "Variable length text",
+      "DATE_FIELD": "2024-01-15 00:00:00",
+      "TIMESTAMP_FIELD": "2024-01-15 10:30:00",
+      "CLOB_FIELD": "This is a large text field for testing CLOB data type",
+      "BLOB_FIELD": null
+    },
+    {
+      "TEST_ID": 3002,
+      "NUM_INTEGER": 67890,
+      "NUM_SMALLINT": 200,
+      "NUM_DECIMAL": "98765.4321",
+      "NUM_FLOAT": "2.71828",
+      "CHAR_FIXED": "TEST",
+      "CHAR_VAR": "Another test string",
+      "DATE_FIELD": "2024-02-20 00:00:00",
+      "TIMESTAMP_FIELD": "2024-02-20 14:45:30",
+      "CLOB_FIELD": "Another CLOB test with more text content",
+      "BLOB_FIELD": null
+    }
+  ],
+  "ORACLE_DATATYPE_COMPREHENSIVE": [
+    {
+      "ID": 4001,
+      "NUM_NO_PRECISION": "123456789",
+      "NUM_WITH_PRECISION": 1234567890,
+      "NUM_WITH_SCALE": "12345.67",
+      "INT_TYPE": 42,
+      "SMALLINT_TYPE": 100,
+      "FLOAT_TYPE": "3.14159265",
+      "FLOAT_WITH_PRECISION": "2.71828182",
+      "BINARY_FLOAT_TYPE": "1.414",
+      "BINARY_DOUBLE_TYPE": "1.732",
+      "CHAR_TYPE": "Fixed50",
+      "VARCHAR_TYPE": "Variable 100",
+      "VARCHAR2_TYPE": "Oracle VARCHAR2 200",
+      "NCHAR_TYPE": "Unicode25",
+      "NVARCHAR2_TYPE": "Unicode Variable",
+      "DATE_TYPE": "2024-01-01 00:00:00",
+      "TIMESTAMP_TYPE": "2024-01-01 00:00:00",
+      "TIMESTAMP_PRECISION": "2024-01-01 00:00:00",
+      "TIMESTAMP_TZ": "2024-01-01 00:00:00",
+      "TIMESTAMP_LTZ": "2024-01-01 00:00:00",
+      "INTERVAL_YM": "1-6",
+      "INTERVAL_DS": "1 12:30:45",
+      "RAW_TYPE": null,
+      "CLOB_TYPE": "Large character object",
+      "NCLOB_TYPE": "National character LOB",
+      "BLOB_TYPE": null,
+      "ROWID_TYPE": "AAAA1234567890",
+      "UROWID_TYPE": "UUUU9876543210"
+    },
+    {
+      "ID": 4002,
+      "NUM_NO_PRECISION": "987654321",
+      "NUM_WITH_PRECISION": 9876543210,
+      "NUM_WITH_SCALE": "98765.43",
+      "INT_TYPE": 99,
+      "SMALLINT_TYPE": 200,
+      "FLOAT_TYPE": "2.71828",
+      "FLOAT_WITH_PRECISION": "1.41421",
+      "BINARY_FLOAT_TYPE": "3.14",
+      "BINARY_DOUBLE_TYPE": "2.71",
+      "CHAR_TYPE": "Test50",
+      "VARCHAR_TYPE": "Test Variable",
+      "VARCHAR2_TYPE": "Test VARCHAR2",
+      "NCHAR_TYPE": "TestUnicode",
+      "NVARCHAR2_TYPE": "Test Unicode Var",
+      "DATE_TYPE": "2024-06-15 00:00:00",
+      "TIMESTAMP_TYPE": "2024-06-15 12:30:00",
+      "TIMESTAMP_PRECISION": "2024-06-15 12:30:00",
+      "TIMESTAMP_TZ": "2024-06-15 12:30:00",
+      "TIMESTAMP_LTZ": "2024-06-15 12:30:00",
+      "INTERVAL_YM": "2-3",
+      "INTERVAL_DS": "2 06:15:30",
+      "RAW_TYPE": null,
+      "CLOB_TYPE": "Another CLOB test",
+      "NCLOB_TYPE": "Another NCLOB test",
+      "BLOB_TYPE": null,
+      "ROWID_TYPE": "BBBB9876543210",
+      "UROWID_TYPE": "VVVV1234567890"
+    }
+  ]
+}
