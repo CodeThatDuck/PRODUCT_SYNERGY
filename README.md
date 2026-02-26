@@ -1,9 +1,10 @@
 # 🚀 Oracle to DB2 Migration Tool
 
-A clean, JSON-driven tool for migrating Oracle databases to IBM DB2 with automatic schema conversion and data transformation.
+A comprehensive, JSON-driven tool for migrating Oracle databases to IBM DB2 with automatic schema conversion, data transformation, and REST API support.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com/)
 
 ## 📋 Table of Contents
 
@@ -25,6 +26,7 @@ A clean, JSON-driven tool for migrating Oracle databases to IBM DB2 with automat
 
 ## ✨ Features
 
+### Core Migration Features
 - **🎯 JSON-Driven**: No hardcoded schemas - everything configured in JSON
 - **🔄 Automatic Type Conversion**: 28+ Oracle to DB2 data type mappings
 - **🏗️ Schema Cloning**: Creates DB2 tables from JSON configuration
@@ -34,6 +36,14 @@ A clean, JSON-driven tool for migrating Oracle databases to IBM DB2 with automat
 - **✅ Comprehensive Testing**: End-to-end test suite included
 - **📝 SQL Generation**: Produces reference SQL files for both databases
 - **🧹 Clean Architecture**: Modular, maintainable, and extensible
+
+### NEW: REST API Features 🆕
+- **🌐 FastAPI Backend**: Modern, async REST API for migration operations
+- **📤 File Upload**: Upload Oracle SQL files via API
+- **🔄 3-Part Conversion**: Parse SQL → Clone Schema → Migrate Data
+- **📊 Real-time Progress**: Get detailed conversion status and statistics
+- **📖 Auto-Documentation**: Swagger UI and ReDoc included
+- **🔌 CORS Enabled**: Ready for frontend integration
 
 ---
 
@@ -268,7 +278,54 @@ DB2_CONFIG = {
 
 ## 📖 Usage
 
-### Basic Workflow
+### Option 1: REST API (Recommended for UI Integration)
+
+#### Start the API Server
+```bash
+# Activate virtual environment
+source venv/bin/activate
+
+# Start FastAPI server
+uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+**API will be available at:** `http://localhost:8000`
+
+#### Access API Documentation
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+
+#### API Endpoints
+
+**1. Upload Oracle SQL File**
+```bash
+curl -X POST "http://localhost:8000/api/upload" \
+  -F "file=@database/schemas/oracle_source_schema.sql"
+```
+
+**2. Convert to DB2 (3-Part Process)**
+```bash
+curl -X POST "http://localhost:8000/api/convert?filename=oracle_source_schema_oracle.sql"
+```
+
+**Response includes:**
+- Part A: Parse SQL to JSON
+- Part B: Generate DB2 schema
+- Part C: Migrate data with statistics
+
+#### Test the API
+```bash
+# Run automated test suite
+python3 api/test_api.py
+```
+
+**See `api/README.md` for complete API documentation.**
+
+---
+
+### Option 2: Command Line Scripts
+
+#### Basic Workflow
 
 ```bash
 # 1. Activate virtual environment
@@ -305,10 +362,34 @@ podman exec product-synergy-db2 su - db2inst1 -c "db2 connect to proddb && db2 '
 
 ## 🧪 Testing
 
-### Run Complete End-to-End Test
+### Test the REST API
 
 ```bash
-python tests/test_complete_migration.py
+# Start API server first (in Terminal 1)
+uvicorn api.main:app --reload
+
+# Run API tests (in Terminal 2)
+python3 api/test_api.py
+```
+
+**Expected:** All 3 tests pass (Health Check, Upload, Convert)
+
+---
+
+### Test Data Mapper
+
+```bash
+python3 tests/test_data_mapper.py
+```
+
+**Expected:** 100% success rate on all transformations
+
+---
+
+### Test Complete Migration Flow
+
+```bash
+python3 tests/test_complete_flow.py
 ```
 
 **Test Coverage:**
@@ -373,27 +454,38 @@ Sample data is located in `tests/sample_oracle_data.json`. Modify this file to t
 
 ```
 PRODUCT_SYNERGY/
+├── api/                                 # 🆕 REST API
+│   ├── main.py                          # FastAPI application
+│   ├── README.md                        # API documentation
+│   └── test_api.py                      # API test suite
 ├── database/
 │   ├── migrations/
 │   │   ├── table_mappings.json          # Main configuration
 │   │   └── type_mappings_reference.json # Type conversion reference
 │   └── schemas/
 │       ├── oracle_source_schema.sql     # Generated Oracle schema
-│       └── db2_target_schema.sql        # Generated DB2 schema
+│       └── db2_generated_schema.sql     # Generated DB2 schema
 ├── scripts/
+│   ├── data_mapper.py                   # 🆕 Data mapping utility
 │   ├── clone_oracle_schema.py           # Schema cloning script
 │   ├── migrate_data.py                  # Data migration script
 │   └── setup_db.sh                      # DB2 container setup
 ├── tests/
 │   ├── sample_oracle_data.json          # Test data
-│   ├── test_complete_migration.py       # End-to-end test
+│   ├── test_complete_flow.py            # 🆕 End-to-end flow test
+│   ├── test_data_mapper.py              # 🆕 Data mapper tests
 │   └── 00_connection_test.py            # Connection test
 ├── docs/
+│   ├── DATA_MAPPER_GUIDE.md             # 🆕 Data mapper documentation
 │   └── ORACLE_TO_DB2_DATATYPE_MAPPINGS.md  # Type reference
+├── uploads/                             # 🆕 Uploaded SQL files (auto-created)
+├── outputs/                             # 🆕 Generated output files (auto-created)
 ├── requirements.txt                     # Python dependencies
 ├── podman-compose.yml                   # Container configuration
+├── CHANGELOG.md                         # 🆕 Detailed change log
 ├── .gitignore                           # Git ignore rules
----
+└── README.md                            # This file
+```
 
 ## 🗺️ Data Mapper Utility
 
@@ -637,8 +729,20 @@ MIT License - Feel free to use and modify
 
 ## 🗺️ Roadmap
 
+### Completed ✅
+- [x] REST API with FastAPI
+- [x] File upload endpoint
+- [x] 3-part conversion process
+- [x] Data Mapper utility
+- [x] Comprehensive test suite
+- [x] API documentation
+
+### In Progress 🚧
 - [ ] SQL Parser (auto-generate JSON from Oracle SQL)
 - [ ] Real Oracle connection (replace mock data)
+- [ ] Comparison endpoint (Oracle vs DB2)
+
+### Planned 📋
 - [ ] Incremental migration support
 - [ ] Data validation and verification
 - [ ] Migration rollback support

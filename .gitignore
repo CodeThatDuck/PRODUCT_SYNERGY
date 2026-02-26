@@ -42,4 +42,5 @@ Thumbs.db
 
 # Environment
 .env
-.env.local
+.env.localuploads/
+outputs/
