@@ -26,6 +26,230 @@
       "PRICE": "79.99"
     }
   ],
+  "CUSTOMERS": [
+    {
+      "CUSTOMER_ID": 5001,
+      "FIRST_NAME": "John",
+      "LAST_NAME": "Doe",
+      "EMAIL": "john.doe@example.com",
+      "PHONE": "5551234567",
+      "REGISTRATION_DATE": "2023-01-15 00:00:00",
+      "LOYALTY_POINTS": 1500
+    },
+    {
+      "CUSTOMER_ID": 5002,
+      "FIRST_NAME": "Jane",
+      "LAST_NAME": "Smith",
+      "EMAIL": "jane.smith@example.com",
+      "PHONE": "15559876543",
+      "REGISTRATION_DATE": "2023-03-20 00:00:00",
+      "LOYALTY_POINTS": 2300
+    },
+    {
+      "CUSTOMER_ID": 5003,
+      "FIRST_NAME": "Bob",
+      "LAST_NAME": "Johnson",
+      "EMAIL": "bob.j@example.com",
+      "PHONE": "5554567890",
+      "REGISTRATION_DATE": "2023-06-10 00:00:00",
+      "LOYALTY_POINTS": 850
+    },
+    {
+      "CUSTOMER_ID": 5004,
+      "FIRST_NAME": "Alice",
+      "LAST_NAME": "Williams",
+      "EMAIL": "alice.w@example.com",
+      "PHONE": null,
+      "REGISTRATION_DATE": "2023-09-05 00:00:00",
+      "LOYALTY_POINTS": 3200
+    },
+    {
+      "CUSTOMER_ID": 5005,
+      "FIRST_NAME": "Charlie",
+      "LAST_NAME": "Brown",
+      "EMAIL": "charlie.brown@example.com",
+      "PHONE": "5551234567",
+      "REGISTRATION_DATE": "2023-11-22 00:00:00",
+      "LOYALTY_POINTS": 450
+    }
+  ],
+  "ORDERS": [
+    {
+      "ORDER_ID": 6001,
+      "CUSTOMER_ID": 5001,
+      "ORDER_DATE": "2024-01-10 00:00:00",
+      "ORDER_STATUS": "DELIVERED",
+      "TOTAL_AMOUNT": "1429.94",
+      "SHIPPING_ADDRESS": "123 Main St, New York, NY 10001"
+    },
+    {
+      "ORDER_ID": 6002,
+      "CUSTOMER_ID": 5001,
+      "ORDER_DATE": "2024-02-15 00:00:00",
+      "ORDER_STATUS": "SHIPPED",
+      "TOTAL_AMOUNT": "679.98",
+      "SHIPPING_ADDRESS": "123 Main St, New York, NY 10001"
+    },
+    {
+      "ORDER_ID": 6003,
+      "CUSTOMER_ID": 5002,
+      "ORDER_DATE": "2024-01-20 00:00:00",
+      "ORDER_STATUS": "DELIVERED",
+      "TOTAL_AMOUNT": "1829.98",
+      "SHIPPING_ADDRESS": "456 Oak Ave, Los Angeles, CA 90001"
+    },
+    {
+      "ORDER_ID": 6004,
+      "CUSTOMER_ID": 5003,
+      "ORDER_DATE": "2024-02-01 00:00:00",
+      "ORDER_STATUS": "PROCESSING",
+      "TOTAL_AMOUNT": "179.94",
+      "SHIPPING_ADDRESS": "789 Pine Rd, Chicago, IL 60601"
+    },
+    {
+      "ORDER_ID": 6005,
+      "CUSTOMER_ID": 5004,
+      "ORDER_DATE": "2024-02-20 00:00:00",
+      "ORDER_STATUS": "DELIVERED",
+      "TOTAL_AMOUNT": "2529.96",
+      "SHIPPING_ADDRESS": "321 Elm St, Houston, TX 77001"
+    },
+    {
+      "ORDER_ID": 6006,
+      "CUSTOMER_ID": 5004,
+      "ORDER_DATE": "2024-02-25 00:00:00",
+      "ORDER_STATUS": "PENDING",
+      "TOTAL_AMOUNT": "129.00",
+      "SHIPPING_ADDRESS": "321 Elm St, Houston, TX 77001"
+    },
+    {
+      "ORDER_ID": 6007,
+      "CUSTOMER_ID": 5005,
+      "ORDER_DATE": "2024-02-28 00:00:00",
+      "ORDER_STATUS": "SHIPPED",
+      "TOTAL_AMOUNT": "49.95",
+      "SHIPPING_ADDRESS": "654 Maple Dr, Phoenix, AZ 85001"
+    }
+  ],
+  "ORDER_ITEMS": [
+    {
+      "ORDER_ITEM_ID": 7001,
+      "ORDER_ID": 6001,
+      "PRODUCT_ID": 1001,
+      "QUANTITY": 1,
+      "UNIT_PRICE": "1299.99",
+      "DISCOUNT_PERCENT": "0.00",
+      "LINE_TOTAL": "1299.99"
+    },
+    {
+      "ORDER_ITEM_ID": 7002,
+      "ORDER_ID": 6001,
+      "PRODUCT_ID": 1003,
+      "QUANTITY": 1,
+      "UNIT_PRICE": "129.00",
+      "DISCOUNT_PERCENT": "0.00",
+      "LINE_TOTAL": "129.00"
+    },
+    {
+      "ORDER_ITEM_ID": 7003,
+      "ORDER_ID": 6002,
+      "PRODUCT_ID": 1004,
+      "QUANTITY": 1,
+      "UNIT_PRICE": "599.99",
+      "DISCOUNT_PERCENT": "0.00",
+      "LINE_TOTAL": "599.99"
+    },
+    {
+      "ORDER_ITEM_ID": 7004,
+      "ORDER_ID": 6002,
+      "PRODUCT_ID": 1005,
+      "QUANTITY": 1,
+      "UNIT_PRICE": "79.99",
+      "DISCOUNT_PERCENT": "0.00",
+      "LINE_TOTAL": "79.99"
+    },
+    {
+      "ORDER_ITEM_ID": 7005,
+      "ORDER_ID": 6003,
+      "PRODUCT_ID": 1001,
+      "QUANTITY": 1,
+      "UNIT_PRICE": "1299.99",
+      "DISCOUNT_PERCENT": "10.00",
+      "LINE_TOTAL": "1169.99"
+    },
+    {
+      "ORDER_ITEM_ID": 7006,
+      "ORDER_ID": 6003,
+      "PRODUCT_ID": 1004,
+      "QUANTITY": 1,
+      "UNIT_PRICE": "599.99",
+      "DISCOUNT_PERCENT": "10.00",
+      "LINE_TOTAL": "539.99"
+    },
+    {
+      "ORDER_ITEM_ID": 7007,
+      "ORDER_ID": 6003,
+      "PRODUCT_ID": 1003,
+      "QUANTITY": 1,
+      "UNIT_PRICE": "129.00",
+      "DISCOUNT_PERCENT": "7.00",
+      "LINE_TOTAL": "119.97"
+    },
+    {
+      "ORDER_ITEM_ID": 7008,
+      "ORDER_ID": 6004,
+      "PRODUCT_ID": 1002,
+      "QUANTITY": 2,
+      "UNIT_PRICE": "49.95",
+      "DISCOUNT_PERCENT": "0.00",
+      "LINE_TOTAL": "99.90"
+    },
+    {
+      "ORDER_ITEM_ID": 7009,
+      "ORDER_ID": 6004,
+      "PRODUCT_ID": 1005,
+      "QUANTITY": 1,
+      "UNIT_PRICE": "79.99",
+      "DISCOUNT_PERCENT": "0.00",
+      "LINE_TOTAL": "79.99"
+    },
+    {
+      "ORDER_ITEM_ID": 7010,
+      "ORDER_ID": 6005,
+      "PRODUCT_ID": 1001,
+      "QUANTITY": 2,
+      "UNIT_PRICE": "1299.99",
+      "DISCOUNT_PERCENT": "5.00",
+      "LINE_TOTAL": "2469.98"
+    },
+    {
+      "ORDER_ITEM_ID": 7011,
+      "ORDER_ID": 6005,
+      "PRODUCT_ID": 1002,
+      "QUANTITY": 1,
+      "UNIT_PRICE": "49.95",
+      "DISCOUNT_PERCENT": "0.00",
+      "LINE_TOTAL": "49.95"
+    },
+    {
+      "ORDER_ITEM_ID": 7012,
+      "ORDER_ID": 6006,
+      "PRODUCT_ID": 1003,
+      "QUANTITY": 1,
+      "UNIT_PRICE": "129.00",
+      "DISCOUNT_PERCENT": "0.00",
+      "LINE_TOTAL": "129.00"
+    },
+    {
+      "ORDER_ITEM_ID": 7013,
+      "ORDER_ID": 6007,
+      "PRODUCT_ID": 1002,
+      "QUANTITY": 1,
+      "UNIT_PRICE": "49.95",
+      "DISCOUNT_PERCENT": "0.00",
+      "LINE_TOTAL": "49.95"
+    }
+  ],
   "SYNERGIES": [
     {
       "SYNERGY_ID": 2001,

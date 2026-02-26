@@ -42,6 +42,250 @@
         }
       }
     },
+    "CUSTOMERS": {
+      "description": "Customer information table",
+      "primary_key": "CUSTOMER_ID",
+      "columns": {
+        "CUSTOMER_ID": {
+          "oracle_type": "NUMBER(10)",
+          "db2_type": "DECIMAL(10,0)",
+          "nullable": false,
+          "transformation": "string_to_integer",
+          "validation": {
+            "type": "integer",
+            "min": 1,
+            "max": 9999999999
+          }
+        },
+        "FIRST_NAME": {
+          "oracle_type": "VARCHAR2(100)",
+          "db2_type": "VARCHAR(100)",
+          "nullable": false,
+          "transformation": "trim_string",
+          "validation": {
+            "type": "string",
+            "max_length": 100,
+            "allow_empty": false
+          }
+        },
+        "LAST_NAME": {
+          "oracle_type": "VARCHAR2(100)",
+          "db2_type": "VARCHAR(100)",
+          "nullable": false,
+          "transformation": "trim_string",
+          "validation": {
+            "type": "string",
+            "max_length": 100,
+            "allow_empty": false
+          }
+        },
+        "EMAIL": {
+          "oracle_type": "VARCHAR2(255)",
+          "db2_type": "VARCHAR(255)",
+          "nullable": false,
+          "transformation": "normalize_email",
+          "validation": {
+            "type": "email"
+          }
+        },
+        "PHONE": {
+          "oracle_type": "VARCHAR2(20)",
+          "db2_type": "VARCHAR(20)",
+          "nullable": true,
+          "transformation": "normalize_phone",
+          "validation": {
+            "type": "string",
+            "max_length": 20
+          }
+        },
+        "REGISTRATION_DATE": {
+          "oracle_type": "DATE",
+          "db2_type": "TIMESTAMP",
+          "nullable": false,
+          "transformation": "string_to_timestamp",
+          "validation": {
+            "type": "timestamp"
+          }
+        },
+        "LOYALTY_POINTS": {
+          "oracle_type": "NUMBER(10)",
+          "db2_type": "DECIMAL(10,0)",
+          "nullable": true,
+          "transformation": "string_to_integer",
+          "validation": {
+            "type": "integer",
+            "min": 0,
+            "max": 9999999999
+          }
+        }
+      }
+    },
+    "ORDERS": {
+      "description": "Customer orders table",
+      "primary_key": "ORDER_ID",
+      "foreign_keys": {
+        "CUSTOMER_ID": "CUSTOMERS.CUSTOMER_ID"
+      },
+      "columns": {
+        "ORDER_ID": {
+          "oracle_type": "NUMBER(10)",
+          "db2_type": "DECIMAL(10,0)",
+          "nullable": false,
+          "transformation": "string_to_integer",
+          "validation": {
+            "type": "integer",
+            "min": 1,
+            "max": 9999999999
+          }
+        },
+        "CUSTOMER_ID": {
+          "oracle_type": "NUMBER(10)",
+          "db2_type": "DECIMAL(10,0)",
+          "nullable": false,
+          "transformation": "string_to_integer",
+          "validation": {
+            "type": "integer",
+            "min": 1,
+            "max": 9999999999
+          }
+        },
+        "ORDER_DATE": {
+          "oracle_type": "DATE",
+          "db2_type": "TIMESTAMP",
+          "nullable": false,
+          "transformation": "string_to_timestamp",
+          "validation": {
+            "type": "timestamp"
+          }
+        },
+        "ORDER_STATUS": {
+          "oracle_type": "VARCHAR2(20)",
+          "db2_type": "VARCHAR(20)",
+          "nullable": false,
+          "transformation": "uppercase",
+          "validation": {
+            "type": "string",
+            "max_length": 20
+          }
+        },
+        "TOTAL_AMOUNT": {
+          "oracle_type": "NUMBER(12,2)",
+          "db2_type": "DECIMAL(12,2)",
+          "nullable": false,
+          "transformation": "string_to_decimal",
+          "validation": {
+            "type": "decimal",
+            "precision": 12,
+            "scale": 2,
+            "min": 0,
+            "max": 9999999999.99
+          }
+        },
+        "SHIPPING_ADDRESS": {
+          "oracle_type": "VARCHAR2(500)",
+          "db2_type": "VARCHAR(500)",
+          "nullable": true,
+          "transformation": "trim_string",
+          "validation": {
+            "type": "string",
+            "max_length": 500
+          }
+        }
+      }
+    },
+    "ORDER_ITEMS": {
+      "description": "Order line items table - links orders to products",
+      "primary_key": "ORDER_ITEM_ID",
+      "foreign_keys": {
+        "ORDER_ID": "ORDERS.ORDER_ID",
+        "PRODUCT_ID": "PRODUCTS.PRODUCT_ID"
+      },
+      "columns": {
+        "ORDER_ITEM_ID": {
+          "oracle_type": "NUMBER(10)",
+          "db2_type": "DECIMAL(10,0)",
+          "nullable": false,
+          "transformation": "string_to_integer",
+          "validation": {
+            "type": "integer",
+            "min": 1,
+            "max": 9999999999
+          }
+        },
+        "ORDER_ID": {
+          "oracle_type": "NUMBER(10)",
+          "db2_type": "DECIMAL(10,0)",
+          "nullable": false,
+          "transformation": "string_to_integer",
+          "validation": {
+            "type": "integer",
+            "min": 1,
+            "max": 9999999999
+          }
+        },
+        "PRODUCT_ID": {
+          "oracle_type": "NUMBER(10)",
+          "db2_type": "DECIMAL(10,0)",
+          "nullable": false,
+          "transformation": "string_to_integer",
+          "validation": {
+            "type": "integer",
+            "min": 1,
+            "max": 9999999999
+          }
+        },
+        "QUANTITY": {
+          "oracle_type": "NUMBER(5)",
+          "db2_type": "DECIMAL(5,0)",
+          "nullable": false,
+          "transformation": "string_to_integer",
+          "validation": {
+            "type": "integer",
+            "min": 1,
+            "max": 99999
+          }
+        },
+        "UNIT_PRICE": {
+          "oracle_type": "NUMBER(10,2)",
+          "db2_type": "DECIMAL(10,2)",
+          "nullable": false,
+          "transformation": "string_to_decimal",
+          "validation": {
+            "type": "decimal",
+            "precision": 10,
+            "scale": 2,
+            "min": 0,
+            "max": 99999999.99
+          }
+        },
+        "DISCOUNT_PERCENT": {
+          "oracle_type": "NUMBER(5,2)",
+          "db2_type": "DECIMAL(5,2)",
+          "nullable": true,
+          "transformation": "string_to_decimal",
+          "validation": {
+            "type": "decimal",
+            "precision": 5,
+            "scale": 2,
+            "min": 0,
+            "max": 100
+          }
+        },
+        "LINE_TOTAL": {
+          "oracle_type": "NUMBER(12,2)",
+          "db2_type": "DECIMAL(12,2)",
+          "nullable": false,
+          "transformation": "string_to_decimal",
+          "validation": {
+            "type": "decimal",
+            "precision": 12,
+            "scale": 2,
+            "min": 0,
+            "max": 9999999999.99
+          }
+        }
+      }
+    },
     "SYNERGIES": {
       "description": "Product synergy relationships table",
       "primary_key": "SYNERGY_ID",
