@@ -35,7 +35,7 @@ sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 DB2_CONFIG = {
     "DATABASE": "proddb",
     "HOSTNAME": "localhost",
-    "PORT": "5001",
+    "PORT": "5000",
     "PROTOCOL": "TCPIP",
     "UID": "db2inst1",
     "PWD": "password"

@@ -5,7 +5,7 @@ import sys
 dsn = (
     "DATABASE=proddb;"
     "HOSTNAME=localhost;"
-    "PORT=5001;"  # Changed from 5000 to 5001 (host port mapping)
+    "PORT=5000;"  # Fixed: Using correct port 5000
     "PROTOCOL=TCPIP;"
     "UID=db2inst1;"
     "PWD=password;"
