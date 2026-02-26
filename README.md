@@ -1,81 +1,81 @@
-# 🚀 Oracle to DB2 Migration Tool
+# 🚀 Project Synergy: Oracle to DB2 Takeout Engine
 
-A comprehensive, JSON-driven tool for migrating Oracle databases to IBM DB2 with automatic schema conversion, data transformation, and REST API support.
+**Enterprise Migration Command Center** - A comprehensive tool for migrating Oracle databases to IBM DB2 with automated schema conversion, data migration, and ROI analysis.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com/)
+![IBM](https://img.shields.io/badge/IBM-DB2-blue)
+![Python](https://img.shields.io/badge/Python-3.8+-green)
+![React](https://img.shields.io/badge/React-18+-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-teal)
 
 ## 📋 Table of Contents
 
-- [Features](#-features)
-- [Architecture](#-architecture)
-- [Prerequisites](#-prerequisites)
-- [Installation](#-installation)
-- [Quick Start](#-quick-start)
-- [Configuration](#-configuration)
-- [Usage](#-usage)
-- [Testing](#-testing)
-- [Project Structure](#-project-structure)
-- [Data Type Mappings](#-data-type-mappings)
-- [Troubleshooting](#-troubleshooting)
-- [Contributing](#-contributing)
-- [License](#-license)
-
----
+- [Features](#features)
+- [Architecture](#architecture)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Running the Application](#running-the-application)
+- [Usage Guide](#usage-guide)
+- [API Documentation](#api-documentation)
+- [Project Structure](#project-structure)
+- [Configuration](#configuration)
+- [Testing](#testing)
+- [Troubleshooting](#troubleshooting)
 
 ## ✨ Features
 
-### Core Migration Features
-- **🎯 JSON-Driven**: No hardcoded schemas - everything configured in JSON
-- **🔄 Automatic Type Conversion**: 28+ Oracle to DB2 data type mappings
-- **🏗️ Schema Cloning**: Creates DB2 tables from JSON configuration
-- **📊 Data Migration**: Transforms and loads data with validation
-- **🗺️ Advanced Data Mapper**: 13 transformations, 9 validation types, statistics tracking
-- **🔗 Relationship Handling**: Automatic foreign keys and indexes
-- **✅ Comprehensive Testing**: End-to-end test suite included
-- **📝 SQL Generation**: Produces reference SQL files for both databases
-- **🧹 Clean Architecture**: Modular, maintainable, and extensible
+### 🔄 **Automated Schema Conversion**
+- Converts Oracle SQL DDL to DB2-compatible SQL
+- Handles 28+ Oracle data types with intelligent mapping
+- Preserves constraints, indexes, and foreign keys
+- Generates side-by-side comparison views
 
-### NEW: REST API Features 🆕
-- **🌐 FastAPI Backend**: Modern, async REST API for migration operations
-- **📤 File Upload**: Upload Oracle SQL files via API
-- **🔄 3-Part Conversion**: Parse SQL → Clone Schema → Migrate Data
-- **📊 Real-time Progress**: Get detailed conversion status and statistics
-- **📖 Auto-Documentation**: Swagger UI and ReDoc included
-- **🔌 CORS Enabled**: Ready for frontend integration
+### 📊 **Data Migration Engine**
+- JSON-driven migration configuration
+- 13 built-in data transformations
+- 9 validation types for data integrity
+- Real-time migration progress tracking
+- Comprehensive verification reports
 
----
+### 💰 **Oracle Takeout ROI Calculator**
+- Real industry benchmarks (Oracle vs DB2 costs)
+- Interactive database size slider (10-1000 GB)
+- Detailed cost breakdowns:
+  - Licensing costs
+  - Support fees
+  - Storage costs (with DB2 compression)
+  - DBA labor costs
+- 5-year financial projections
+- ROI payback period calculation
 
-## 🏛️ Architecture
+### 🎨 **Modern Web Interface**
+- Built with React 18 + Vite
+- IBM Carbon Design System
+- Real-time updates with hot module reload
+- Responsive design for all devices
+
+## 🏗️ Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                   MIGRATION WORKFLOW                     │
+│                    React Frontend                        │
+│              (Port 3001 - Vite Dev Server)              │
+│  • Source Ingestion  • SQL Diff Viewer                  │
+│  • Migration & Data Audit  • TCO Calculator             │
+└────────────────────┬────────────────────────────────────┘
+                     │ HTTP/REST API
+┌────────────────────▼────────────────────────────────────┐
+│                  FastAPI Backend                         │
+│               (Port 8000 - Uvicorn)                     │
+│  • /api/process-raw-sql  • /api/run-full-migration     │
+│  • /api/get-tco-analysis • /api/health                  │
+└────────────────────┬────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────┐
+│              Migration Engine                            │
+│  • Schema Converter  • Data Mapper                      │
+│  • Validation Engine • Statistics Tracker               │
 └─────────────────────────────────────────────────────────┘
-
-Step 1: Configuration
-├── Input: table_mappings.json
-├── Defines: Oracle schema, DB2 mappings, transformations
-└── Purpose: Single source of truth
-
-Step 2: Clone Schema
-├── Script: clone_oracle_schema.py
-├── Reads: table_mappings.json
-├── Creates: DB2 tables, indexes, constraints
-├── Generates: oracle_source_schema.sql, db2_target_schema.sql
-└── Output: Empty DB2 schema
-
-Step 3: Migrate Data
-├── Script: migrate_data.py
-├── Reads: table_mappings.json
-├── Extracts: Data from Oracle (or mock data)
-├── Transforms: Based on JSON rules
-├── Loads: Into DB2 tables
-└── Output: Migrated data in DB2
 ```
-
----
 
 ## 📦 Prerequisites
 
@@ -86,671 +86,346 @@ Step 3: Migrate Data
    python --version  # Should be 3.8 or higher
    ```
 
-2. **Podman or Docker** (for DB2 container)
+2. **Node.js 16+** and **npm**
    ```bash
-   podman --version
-   # or
-   docker --version
+   node --version  # Should be 16 or higher
+   npm --version
    ```
 
-3. **IBM DB2 Database**
-   - Option A: Use provided Podman container
-   - Option B: Connect to existing DB2 instance
+3. **IBM DB2 Client** (Optional - for actual database connections)
+   - Download from [IBM DB2 Downloads](https://www.ibm.com/products/db2/downloads)
 
----
+### System Requirements
+- **OS:** macOS, Linux, or Windows
+- **RAM:** 4GB minimum, 8GB recommended
+- **Disk Space:** 500MB for dependencies
 
-## 🔧 Installation
+## 🚀 Installation
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/CodeThatDuck/PRODUCT_SYNERGY.git
-cd PRODUCT_SYNERGY
+git clone <repository-url>
+cd "Product Synergy"
 ```
 
-### 2. Set Up Python Virtual Environment
+### 2. Backend Setup
 
 ```bash
-# Create virtual environment
-python -m venv venv
+# Create Python virtual environment
+python3 -m venv venv
 
 # Activate virtual environment
 # On macOS/Linux:
 source venv/bin/activate
-
 # On Windows:
-venv\Scripts\activate
-```
+# venv\Scripts\activate
 
-### 3. Install Python Dependencies
-
-```bash
-pip install --upgrade pip
+# Install Python dependencies
 pip install -r requirements.txt
 ```
 
-**Note:** Installing `ibm_db` may take a few minutes as it compiles native extensions.
-
-### 4. Set Up DB2 Container (Optional)
-
-If you don't have an existing DB2 instance:
+### 3. Frontend Setup
 
 ```bash
-# Start DB2 container using Podman
-bash scripts/setup_db.sh
+# Navigate to frontend directory
+cd frontend
 
-# Verify container is running
-podman ps | grep db2
+# Install Node.js dependencies
+npm install
 
-# Check DB2 logs
-podman logs product-synergy-db2
+# Return to project root
+cd ..
 ```
 
-**Container Details:**
-- **Database Name:** `proddb`
-- **Port:** `5001`
-- **Username:** `db2inst1`
-- **Password:** `password`
+## 🎯 Running the Application
 
----
+### Option 1: Run Both Services (Recommended)
 
-## 🚀 Quick Start
+Open **two separate terminals**:
 
-### 1. Configure Your Schema
-
-Edit `database/migrations/table_mappings.json` to define your tables:
-
-```json
-{
-  "tables": {
-    "YOUR_TABLE": {
-      "description": "Your table description",
-      "primary_key": "ID",
-      "columns": {
-        "ID": {
-          "oracle_type": "NUMBER(10)",
-          "db2_type": "DECIMAL(10,0)",
-          "nullable": false,
-          "transformation": "string_to_integer"
-        },
-        "NAME": {
-          "oracle_type": "VARCHAR2(255)",
-          "db2_type": "VARCHAR(255)",
-          "nullable": false,
-          "transformation": "trim_string"
-        }
-      }
-    }
-  }
-}
-```
-
-### 2. Clone Oracle Schema to DB2
-
+**Terminal 1 - Backend:**
 ```bash
-python scripts/clone_oracle_schema.py
-```
-
-**This will:**
-- ✅ Read your JSON configuration
-- ✅ Generate `oracle_source_schema.sql` (reference)
-- ✅ Generate `db2_target_schema.sql` (reference)
-- ✅ Create all tables in DB2
-- ✅ Add foreign keys and indexes
-- ✅ Verify table creation
-
-### 3. Migrate Data
-
-```bash
-python scripts/migrate_data.py
-```
-
-**This will:**
-- ✅ Extract data from Oracle (currently mocked)
-- ✅ Transform data based on JSON rules
-- ✅ Load data into DB2 tables
-- ✅ Generate migration report
-
----
-
-## ⚙️ Configuration
-
-### Main Configuration File
-
-**Location:** `database/migrations/table_mappings.json`
-
-#### Table Definition Structure
-
-```json
-{
-  "tables": {
-    "TABLE_NAME": {
-      "description": "Table description",
-      "primary_key": "COLUMN_NAME",
-      "foreign_keys": {
-        "FK_COLUMN": "REFERENCED_TABLE.REFERENCED_COLUMN"
-      },
-      "columns": {
-        "COLUMN_NAME": {
-          "oracle_type": "Oracle data type",
-          "db2_type": "DB2 data type",
-          "nullable": true/false,
-          "transformation": "transformation_rule",
-          "validation": {
-            "type": "data_type",
-            "min": minimum_value,
-            "max": maximum_value
-          },
-          "notes": "Optional notes"
-        }
-      }
-    }
-  }
-}
-```
-
-#### Available Transformations
-
-| Transformation | Description | Example |
-|---------------|-------------|---------|
-| `string_to_integer` | Convert string to integer | `"123"` → `123` |
-| `string_to_decimal` | Convert string to decimal | `"99.99"` → `99.99` |
-| `trim_string` | Remove whitespace | `"  text  "` → `"text"` |
-| `string_to_timestamp` | Parse timestamp | `"2024-01-01"` → `TIMESTAMP` |
-| `pass_through` | No transformation | Binary data unchanged |
-
-### Database Connection
-
-**Location:** `scripts/clone_oracle_schema.py` and `scripts/migrate_data.py`
-
-```python
-DB2_CONFIG = {
-    "DATABASE": "proddb",
-    "HOSTNAME": "localhost",
-    "PORT": "5001",
-    "PROTOCOL": "TCPIP",
-    "UID": "db2inst1",
-    "PWD": "password"
-}
-```
-
----
-
-## 📖 Usage
-
-### Option 1: REST API (Recommended for UI Integration)
-
-#### Start the API Server
-```bash
-# Activate virtual environment
+cd "Product Synergy"
 source venv/bin/activate
-
-# Start FastAPI server
 uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-**API will be available at:** `http://localhost:8000`
-
-#### Access API Documentation
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
-
-#### API Endpoints
-
-**1. Upload Oracle SQL File**
+**Terminal 2 - Frontend:**
 ```bash
-curl -X POST "http://localhost:8000/api/upload" \
-  -F "file=@database/schemas/oracle_source_schema.sql"
+cd "Product Synergy/frontend"
+npm run dev
 ```
 
-**2. Convert to DB2 (3-Part Process)**
-```bash
-curl -X POST "http://localhost:8000/api/convert?filename=oracle_source_schema_oracle.sql"
-```
-
-**Response includes:**
-- Part A: Parse SQL to JSON
-- Part B: Generate DB2 schema
-- Part C: Migrate data with statistics
-
-#### Test the API
-```bash
-# Run automated test suite
-python3 api/test_api.py
-```
-
-**See `api/README.md` for complete API documentation.**
-
----
-
-### Option 2: Command Line Scripts
-
-#### Basic Workflow
+### Option 2: Quick Start Script
 
 ```bash
-# 1. Activate virtual environment
-source venv/bin/activate
+# Make script executable (first time only)
+chmod +x start.sh
 
-# 2. Clone schema
-python scripts/clone_oracle_schema.py
-
-# 3. Migrate data
-python scripts/migrate_data.py
+# Run both services
+./start.sh
 ```
 
-### Advanced Options
+### Access the Application
 
-#### Verify DB2 Connection
+- **Frontend:** http://localhost:3001
+- **Backend API:** http://localhost:8000
+- **API Docs:** http://localhost:8000/docs
 
+## 📖 Usage Guide
+
+### 1. Source Ingestion
+
+1. Navigate to **Source Ingestion** tab
+2. Upload your Oracle SQL file (DDL statements)
+3. System automatically:
+   - Detects tables and columns
+   - Analyzes data types
+   - Generates DB2-compatible SQL
+
+### 2. SQL Diff Viewer
+
+1. View side-by-side comparison:
+   - **Left:** Original Oracle SQL
+   - **Right:** Converted DB2 SQL
+2. Toggle **"Highlight Differences"** to see:
+   - Oracle-specific types (red)
+   - DB2 replacement types (green)
+
+### 3. Migration & Data Audit
+
+1. Click **"🚀 Run Full Migration"** button
+2. System performs:
+   - Schema creation
+   - Mock data generation
+   - Data migration with transformations
+   - Integrity verification
+3. View results table with:
+   - Records migrated per table
+   - Transformations applied
+   - Validations passed
+   - Green "VERIFIED" badges
+
+### 4. TCO Calculator
+
+1. Adjust **Database Size** slider (10-1000 GB)
+2. View real-time calculations:
+   - Annual cost comparison
+   - Savings percentage
+   - ROI payback period
+3. Explore detailed breakdowns:
+   - Oracle costs (license, support, storage, labor)
+   - DB2 costs (with compression benefits)
+   - 5-year financial projection
+
+## 🔌 API Documentation
+
+### Health Check
 ```bash
-python -c "import ibm_db; conn = ibm_db.connect('DATABASE=proddb;HOSTNAME=localhost;PORT=5001;PROTOCOL=TCPIP;UID=db2inst1;PWD=password;', '', ''); print('✅ Connected to DB2')"
+GET /api/health
 ```
 
-#### Check Tables in DB2
-
+### Process Oracle SQL
 ```bash
-podman exec product-synergy-db2 su - db2inst1 -c "db2 connect to proddb && db2 list tables && db2 connect reset"
+POST /api/process-raw-sql
+Content-Type: multipart/form-data
+
+file: <oracle_sql_file>
 ```
 
-#### Query Data
-
+### Run Full Migration
 ```bash
-podman exec product-synergy-db2 su - db2inst1 -c "db2 connect to proddb && db2 'SELECT * FROM PRODUCTS' && db2 connect reset"
+POST /api/run-full-migration?mapping_file=table_mappings.json
 ```
 
----
-
-## 🧪 Testing
-
-### Test the REST API
-
+### Get TCO Analysis
 ```bash
-# Start API server first (in Terminal 1)
-uvicorn api.main:app --reload
-
-# Run API tests (in Terminal 2)
-python3 api/test_api.py
+GET /api/get-tco-analysis?table_count=7&column_count=100&database_size_gb=100
 ```
 
-**Expected:** All 3 tests pass (Health Check, Upload, Convert)
-
----
-
-### Test Data Mapper
-
-```bash
-python3 tests/test_data_mapper.py
-```
-
-**Expected:** 100% success rate on all transformations
-
----
-
-### Test Complete Migration Flow
-
-```bash
-python3 tests/test_complete_flow.py
-```
-
-**Test Coverage:**
-- ✅ Drops existing tables (clean slate)
-- ✅ Creates schema from JSON
-- ✅ Loads sample data
-- ✅ Verifies record counts
-- ✅ Displays sample data with SELECT queries
-- ✅ Tests all 4 tables (14 records total)
-
-### Expected Output
-
-```
-============================================================
-Complete End-to-End Migration Test
-============================================================
-
-📋 Loading configuration...
-✅ Config: 4 tables
-✅ Sample data: 14 total records
-
-🔌 Connecting to DB2...
-✅ Connected
-
-🗑️  Dropping existing tables...
-  ✅ Dropped ORACLE_DATATYPE_COMPREHENSIVE
-  ✅ Dropped DATATYPE_TEST
-  ✅ Dropped SYNERGIES
-  ✅ Dropped PRODUCTS
-
-🔨 Creating tables...
-  ✅ Created table PRODUCTS
-  ✅ Created table SYNERGIES
-  ✅ Created table DATATYPE_TEST
-  ✅ Created table ORACLE_DATATYPE_COMPREHENSIVE
-
-📥 Loading sample data...
-  ✅ PRODUCTS: Loaded 5/5 records
-  ✅ SYNERGIES: Loaded 5/5 records
-  ✅ DATATYPE_TEST: Loaded 2/2 records
-  ✅ ORACLE_DATATYPE_COMPREHENSIVE: Loaded 2/2 records
-
-✓ Verifying data...
-  ✅ PRODUCTS: 5 rows (expected 5)
-  ✅ SYNERGIES: 5 rows (expected 5)
-  ✅ DATATYPE_TEST: 2 rows (expected 2)
-  ✅ ORACLE_DATATYPE_COMPREHENSIVE: 2 rows (expected 2)
-
-============================================================
-✅ ALL TESTS PASSED!
-✅ Successfully migrated 14 records
-============================================================
-```
-
-### Test Data
-
-Sample data is located in `tests/sample_oracle_data.json`. Modify this file to test with your own data.
-
----
+**Interactive API Documentation:** http://localhost:8000/docs
 
 ## 📁 Project Structure
 
 ```
-PRODUCT_SYNERGY/
-├── api/                                 # 🆕 REST API
-│   ├── main.py                          # FastAPI application
-│   ├── README.md                        # API documentation
-│   └── test_api.py                      # API test suite
+Product Synergy/
+├── api/
+│   └── main.py                 # FastAPI backend server
 ├── database/
 │   ├── migrations/
-│   │   ├── table_mappings.json          # Main configuration
-│   │   └── type_mappings_reference.json # Type conversion reference
+│   │   ├── table_mappings.json # Migration configuration
+│   │   └── type_mappings_reference.json
 │   └── schemas/
-│       ├── oracle_source_schema.sql     # Generated Oracle schema
-│       └── db2_generated_schema.sql     # Generated DB2 schema
+│       ├── oracle_source_schema.sql
+│       └── db2_target_schema.sql
+├── frontend/
+│   ├── src/
+│   │   ├── App.jsx            # Main React application
+│   │   └── index.css          # Tailwind CSS styles
+│   ├── package.json
+│   └── vite.config.js
 ├── scripts/
-│   ├── data_mapper.py                   # 🆕 Data mapping utility
-│   ├── clone_oracle_schema.py           # Schema cloning script
-│   ├── migrate_data.py                  # Data migration script
-│   └── setup_db.sh                      # DB2 container setup
+│   ├── clone_oracle_schema.py # Schema generator
+│   ├── migrate_data.py        # Data migration engine
+│   └── data_mapper.py         # Data transformation utilities
 ├── tests/
-│   ├── sample_oracle_data.json          # Test data
-│   ├── test_complete_flow.py            # 🆕 End-to-end flow test
-│   ├── test_data_mapper.py              # 🆕 Data mapper tests
-│   └── 00_connection_test.py            # Connection test
-├── docs/
-│   ├── DATA_MAPPER_GUIDE.md             # 🆕 Data mapper documentation
-│   └── ORACLE_TO_DB2_DATATYPE_MAPPINGS.md  # Type reference
-├── uploads/                             # 🆕 Uploaded SQL files (auto-created)
-├── outputs/                             # 🆕 Generated output files (auto-created)
-├── requirements.txt                     # Python dependencies
-├── podman-compose.yml                   # Container configuration
-├── CHANGELOG.md                         # 🆕 Detailed change log
-├── .gitignore                           # Git ignore rules
-└── README.md                            # This file
+│   ├── sample_oracle_data.json
+│   ├── test_complex_queries.py
+│   └── run_all_tests.py
+├── uploads/                    # Uploaded SQL files
+├── requirements.txt           # Python dependencies
+├── README.md                  # This file
+└── .gitignore
 ```
 
-## 🗺️ Data Mapper Utility
+## ⚙️ Configuration
 
-### Overview
+### Backend Configuration
 
-The **DataMapper** is an advanced utility for comprehensive data transformation and validation during migration. It provides a reusable framework for mapping Oracle data to DB2 format.
-
-### Key Features
-
-- **13 Built-in Transformations**: String, numeric, date, and specialized transformations
-- **9 Validation Types**: Comprehensive data quality checks
-- **Statistics Tracking**: Monitor transformation success rates
-- **Extensible**: Easy to add custom transformations and validations
-- **Type-Safe**: Handles edge cases and null values gracefully
-
-### Quick Example
+Edit `api/main.py` to configure:
 
 ```python
-from scripts.data_mapper import DataMapper
+# CORS settings
+origins = [
+    "http://localhost:3000",
+    "http://localhost:3001",
+]
 
-# Initialize mapper
-mapper = DataMapper()
-
-# Map a single row
-source_row = {
-    "PRODUCT_ID": "1001",
-    "NAME": "  Gaming Laptop  ",
-    "PRICE": "1299.99"
-}
-
-mapped_row = mapper.map_row(source_row, "PRODUCTS")
-# Result: {'PRODUCT_ID': 1001, 'NAME': 'Gaming Laptop', 'PRICE': Decimal('1299.99')}
-
-# Map multiple rows
-mapped_rows = mapper.map_table_data(all_rows, "PRODUCTS", validate=True)
-
-# View statistics
-mapper.print_statistics()
+# File upload settings
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 ```
 
-### Available Transformations
+### Frontend Configuration
 
-| Transformation | Description | Example |
-|---------------|-------------|---------|
-| `string_to_integer` | Convert string to integer | `"1001"` → `1001` |
-| `string_to_decimal` | Convert to decimal with precision | `"99.99"` → `Decimal('99.99')` |
-| `trim_string` | Remove whitespace | `"  text  "` → `"text"` |
-| `string_to_timestamp` | Parse timestamp | `"2024-01-01"` → `datetime` |
-| `uppercase` | Convert to uppercase | `"test"` → `"TEST"` |
-| `lowercase` | Convert to lowercase | `"TEST"` → `"test"` |
-| `normalize_phone` | Extract digits from phone | `"(555) 123-4567"` → `"5551234567"` |
-| `normalize_email` | Normalize email format | `"User@Example.COM"` → `"user@example.com"` |
-| `string_to_boolean` | Convert to boolean | `"true"` → `True` |
-| `remove_special_chars` | Remove special characters | `"Test@123"` → `"Test123"` |
-| `pad_string` | Pad to length | `"ABC"` → `"ABC       "` |
-| `truncate_string` | Truncate to max length | Long text → First N chars |
-| `pass_through` | No transformation | Value unchanged |
+Edit `frontend/src/App.jsx`:
 
-### Available Validations
+```javascript
+const API_BASE_URL = 'http://localhost:8000';
+```
 
-| Validation | Description | Configuration |
-|-----------|-------------|---------------|
-| `integer` | Validate integer with min/max | `{"type": "integer", "min": 1, "max": 999}` |
-| `decimal` | Validate decimal with precision | `{"type": "decimal", "precision": 10, "scale": 2}` |
-| `string` | Validate string length/pattern | `{"type": "string", "max_length": 255}` |
-| `timestamp` | Validate date range | `{"type": "timestamp", "min_date": "2020-01-01"}` |
-| `email` | Validate email format | `{"type": "email"}` |
-| `phone` | Validate phone length | `{"type": "phone", "min_length": 10}` |
-| `url` | Validate URL format | `{"type": "url"}` |
-| `binary` | Validate binary data | `{"type": "binary"}` |
-| `range` | Validate numeric range | `{"type": "range", "min": 0, "max": 100}` |
+### Database Configuration
 
-### Testing the Mapper
+Edit `database/migrations/table_mappings.json` to customize:
+- Table definitions
+- Column mappings
+- Data type conversions
+- Transformations
+- Validations
+
+## 🧪 Testing
+
+### Run Backend Tests
 
 ```bash
-# Run comprehensive test suite
-python3 tests/test_data_mapper.py
-
-# Run standalone example
-python3 scripts/data_mapper.py
+source venv/bin/activate
+python tests/run_all_tests.py
 ```
 
-### Complete Documentation
+### Test Individual Scripts
 
-For detailed usage, examples, and API reference, see:
-- **[Data Mapper Guide](docs/DATA_MAPPER_GUIDE.md)** - Complete documentation with examples
+```bash
+# Test schema generation
+python scripts/clone_oracle_schema.py
 
-└── README.md                            # This file
+# Test data migration
+python scripts/migrate_data.py
 ```
 
----
+### Test API Endpoints
 
-## 🔄 Data Type Mappings
+```bash
+# Health check
+curl http://localhost:8000/api/health
 
-### Common Mappings
+# TCO Analysis
+curl "http://localhost:8000/api/get-tco-analysis?table_count=7&column_count=100&database_size_gb=100"
+```
+
+## 🔧 Troubleshooting
+
+### Backend Issues
+
+**Problem:** `ModuleNotFoundError: No module named 'fastapi'`
+```bash
+# Solution: Activate virtual environment and reinstall
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+**Problem:** Port 8000 already in use
+```bash
+# Solution: Use different port
+uvicorn api.main:app --reload --port 8001
+# Update frontend API_BASE_URL accordingly
+```
+
+### Frontend Issues
+
+**Problem:** `npm: command not found`
+```bash
+# Solution: Install Node.js from https://nodejs.org/
+```
+
+**Problem:** Port 3001 already in use
+```bash
+# Solution: Kill process or use different port
+# Edit vite.config.js to change port
+```
+
+### Database Connection Issues
+
+**Problem:** DB2 connection fails
+```bash
+# This is expected if DB2 is not installed
+# The tool works in simulation mode without actual DB2
+# For production use, install IBM DB2 client
+```
+
+## 📊 Data Type Mappings
 
 | Oracle Type | DB2 Type | Notes |
 |------------|----------|-------|
-| `NUMBER(p,s)` | `DECIMAL(p,s)` | Precision preserved |
-| `VARCHAR2(n)` | `VARCHAR(n)` | Direct mapping |
-| `DATE` | `TIMESTAMP` | Oracle DATE includes time |
-| `CLOB` | `CLOB` | Large text objects |
-| `BLOB` | `BLOB` | Binary objects |
-| `FLOAT` | `DOUBLE` | Floating point |
-| `NVARCHAR2(n)` | `VARGRAPHIC(n)` | Unicode support |
-| `ROWID` | `VARCHAR(18)` | No direct equivalent |
-
-**See `docs/ORACLE_TO_DB2_DATATYPE_MAPPINGS.md` for complete reference (28+ types).**
-
----
-
-## 🔍 Troubleshooting
-
-### Common Issues
-
-#### 1. `ibm_db` Installation Fails
-
-**Problem:** Compilation errors during `pip install ibm_db`
-
-**Solution:**
-```bash
-# macOS
-brew install gcc
-
-# Ubuntu/Debian
-sudo apt-get install gcc python3-dev
-
-# Then retry
-pip install ibm_db
-```
-
-#### 2. DB2 Container Won't Start
-
-**Problem:** Port 5001 already in use
-
-**Solution:**
-```bash
-# Check what's using the port
-lsof -i :5001
-
-# Stop the container
-podman stop product-synergy-db2
-
-# Remove the container
-podman rm product-synergy-db2
-
-# Restart
-bash scripts/setup_db.sh
-```
-
-#### 3. Connection Refused
-
-**Problem:** Cannot connect to DB2
-
-**Solution:**
-```bash
-# Check container status
-podman ps -a | grep db2
-
-# Check logs
-podman logs product-synergy-db2
-
-# Restart container
-podman restart product-synergy-db2
-
-# Wait 30 seconds for DB2 to initialize
-sleep 30
-```
-
-#### 4. Table Already Exists
-
-**Problem:** Tables already exist in DB2
-
-**Solution:**
-```bash
-# Drop tables manually
-podman exec product-synergy-db2 su - db2inst1 -c "db2 connect to proddb && db2 'DROP TABLE SYNERGIES' && db2 'DROP TABLE PRODUCTS' && db2 connect reset"
-
-# Or run the test script (it drops tables automatically)
-python tests/test_complete_migration.py
-```
-
----
+| VARCHAR2 | VARCHAR | Direct mapping |
+| NUMBER | DECIMAL | Precision preserved |
+| DATE | DATE | Compatible |
+| CLOB | CLOB | Large objects |
+| BLOB | BLOB | Binary data |
+| TIMESTAMP | TIMESTAMP | Time precision |
+| RAW | VARBINARY | Binary conversion |
+| NVARCHAR2 | VARGRAPHIC | Unicode support |
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please ensure:
-
-1. **No hardcoded schemas** - All configurations in JSON
-2. **Clean, modular code** - Follow existing patterns
-3. **Documentation updates** - Update README for new features
-4. **Tests pass** - Run `python tests/test_complete_migration.py`
-
-### Development Setup
-
-```bash
-# Fork and clone the repository
-git clone https://github.com/YOUR_USERNAME/PRODUCT_SYNERGY.git
-cd PRODUCT_SYNERGY
-
-# Create a feature branch
-git checkout -b feature/your-feature-name
-
-# Make changes and test
-python tests/test_complete_migration.py
-
-# Commit and push
-git add .
-git commit -m "Add your feature"
-git push origin feature/your-feature-name
-
-# Create a Pull Request on GitHub
-```
-
----
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Open Pull Request
 
 ## 📄 License
 
-MIT License - Feel free to use and modify
+This project is proprietary software developed for IBM DB2 migration services.
 
----
+## 👥 Authors
+
+- **Bob** - Senior Software Engineer
 
 ## 🙏 Acknowledgments
 
 - IBM DB2 Documentation
-- Oracle Database Documentation
-- Python `ibm_db` driver maintainers
-
----
+- FastAPI Framework
+- React + Vite
+- IBM Carbon Design System
+- Tailwind CSS
 
 ## 📞 Support
 
-- **Issues:** [GitHub Issues](https://github.com/CodeThatDuck/PRODUCT_SYNERGY/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/CodeThatDuck/PRODUCT_SYNERGY/discussions)
+For issues and questions:
+- Create an issue in the repository
+- Contact the development team
+- Check API documentation at `/docs`
 
 ---
 
-**Built with ❤️ for clean, maintainable database migrations**
-
----
-
-## 🗺️ Roadmap
-
-### Completed ✅
-- [x] REST API with FastAPI
-- [x] File upload endpoint
-- [x] 3-part conversion process
-- [x] Data Mapper utility
-- [x] Comprehensive test suite
-- [x] API documentation
-
-### In Progress 🚧
-- [ ] SQL Parser (auto-generate JSON from Oracle SQL)
-- [ ] Real Oracle connection (replace mock data)
-- [ ] Comparison endpoint (Oracle vs DB2)
-
-### Planned 📋
-- [ ] Incremental migration support
-- [ ] Data validation and verification
-- [ ] Migration rollback support
-- [ ] Performance optimization for large datasets
-- [ ] Web UI for configuration
-- [ ] Docker Compose support
-- [ ] CI/CD integration examples
-
----
-
-**⭐ Star this repo if you find it useful!**
+**Made with ❤️ for Enterprise Database Migration**

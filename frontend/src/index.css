@@ -1,0 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-ibm bg-white text-ibm-gray-100;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-ibm-blue hover:bg-ibm-blue-hover text-white font-medium px-6 py-3 rounded transition-colors duration-200;
+  }
+  
+  .btn-secondary {
+    @apply bg-ibm-gray-10 hover:bg-ibm-gray-20 text-ibm-gray-100 font-medium px-6 py-3 rounded transition-colors duration-200;
+  }
+  
+  .card {
+    @apply bg-white border border-ibm-gray-20 rounded shadow-sm p-6;
+  }
+  
+  .card-header {
+    @apply flex justify-between items-center mb-6 pb-4 border-b border-ibm-gray-20;
+  }
+}
+
+/* Made with Bob */

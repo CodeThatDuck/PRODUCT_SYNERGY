@@ -1,15 +1,55 @@
-# Oracle to DB2 Migration Tool - Python Dependencies
+# Project Synergy: Oracle to DB2 Migration Tool
+# Python Dependencies
 
-# IBM DB2 Driver
-ibm_db>=3.1.0
-
-# FastAPI and Web Server
+# ============================================
+# Core Web Framework
+# ============================================
 fastapi>=0.104.0
 uvicorn[standard]>=0.24.0
 python-multipart>=0.0.6
 
-# HTTP Client for testing
-requests>=2.31.0
+# ============================================
+# Database Drivers
+# ============================================
+ibm_db>=3.1.0
 
-# Core dependencies (usually included with Python)
-# No additional packages required - uses only standard library
+# ============================================
+# HTTP & API
+# ============================================
+requests>=2.31.0
+httpx>=0.25.0
+
+# ============================================
+# Data Processing
+# ============================================
+# All data processing uses Python standard library
+# (json, pathlib, datetime, etc.)
+
+# ============================================
+# Development & Testing (Optional)
+# ============================================
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+
+# ============================================
+# Code Quality (Optional)
+# ============================================
+black>=23.0.0
+flake8>=6.0.0
+
+# ============================================
+# Notes
+# ============================================
+# - ibm_db requires IBM DB2 client libraries
+# - For macOS: brew install ibm-db2
+# - For Linux: Download from IBM website
+# - For Windows: Download from IBM website
+#
+# Installation:
+#   pip install -r requirements.txt
+#
+# Virtual Environment Setup:
+#   python3 -m venv venv
+#   source venv/bin/activate  # macOS/Linux
+#   venv\Scripts\activate     # Windows
+#   pip install -r requirements.txt
