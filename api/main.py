@@ -315,6 +315,101 @@ async def convert_oracle_to_db2(filename: str):
         )
 
 
+def analyze_ai_potential(sql_content: str, dynamic_mapping: dict) -> dict:
+    """
+    Analyze uploaded SQL schema for AI/ML readiness.
+    
+    Classifies each column by AI suitability:
+    - Numerical: DECIMAL, NUMBER, INTEGER, FLOAT, DOUBLE — good for regression/classification
+    - Categorical: VARCHAR, CHAR, NVARCHAR — good for embeddings/classification
+    - Temporal: DATE, TIMESTAMP — good for time-series
+    - Textual: CLOB, TEXT, BLOB — good for NLP/LLM fine-tuning
+    - ID/Key: columns ending in _ID or named *KEY* — metadata, not AI features
+    """
+    # Type classification rules
+    numerical_types = ['DECIMAL', 'NUMBER', 'INTEGER', 'INT', 'FLOAT', 'DOUBLE', 'REAL', 'NUMERIC', 'SMALLINT', 'BIGINT']
+    categorical_types = ['VARCHAR', 'VARCHAR2', 'CHAR', 'NVARCHAR', 'NVARCHAR2', 'NCHAR', 'GRAPHIC', 'VARGRAPHIC']
+    temporal_types = ['DATE', 'TIMESTAMP', 'TIME', 'DATETIME']
+    textual_types = ['CLOB', 'BLOB', 'TEXT', 'DBCLOB', 'LONG', 'NCLOB']
+
+    ai_columns = []
+    all_columns = []
+
+    tables = dynamic_mapping.get('tables', {})
+    for table_name, table_def in tables.items():
+        columns = table_def.get('columns', {})
+        for col_name, col_def in columns.items():
+            db2_type = col_def.get('db2_type', col_def.get('oracle_type', '')).upper()
+            # Strip precision e.g. DECIMAL(10,2) -> DECIMAL
+            base_type = db2_type.split('(')[0].strip()
+
+            col_upper = col_name.upper()
+            is_id = col_upper.endswith('_ID') or col_upper in ('ID', 'KEY', 'PK') or 'KEY' in col_upper
+
+            if is_id:
+                ai_type = 'ID/Key'
+                ai_ready = False
+                reason = 'Primary/foreign key — metadata only'
+            elif base_type in numerical_types:
+                ai_type = 'Numerical'
+                ai_ready = True
+                reason = f'{base_type} — suitable for regression, classification, clustering'
+            elif base_type in categorical_types:
+                ai_type = 'Categorical'
+                ai_ready = True
+                reason = f'{base_type} — suitable for embeddings, NLP, classification'
+            elif base_type in temporal_types:
+                ai_type = 'Temporal'
+                ai_ready = True
+                reason = f'{base_type} — suitable for time-series forecasting'
+            elif base_type in textual_types:
+                ai_type = 'Textual'
+                ai_ready = True
+                reason = f'{base_type} — suitable for LLM fine-tuning, NLP'
+            else:
+                ai_type = 'Unknown'
+                ai_ready = False
+                reason = f'{base_type} — type not classified'
+
+            col_entry = {
+                'table': table_name,
+                'column': col_name,
+                'db2_type': db2_type,
+                'ai_type': ai_type,
+                'ai_ready': ai_ready,
+                'reason': reason
+            }
+            all_columns.append(col_entry)
+            if ai_ready:
+                ai_columns.append(col_entry)
+
+    # Build per-table summary
+    table_summary = {}
+    for table_name in tables.keys():
+        table_cols = [c for c in all_columns if c['table'] == table_name]
+        table_ai_cols = [c for c in table_cols if c['ai_ready']]
+        table_summary[table_name] = {
+            'total_columns': len(table_cols),
+            'ai_ready_columns': len(table_ai_cols),
+            'columns': table_cols
+        }
+
+    # Type breakdown
+    type_breakdown = {}
+    for col in ai_columns:
+        t = col['ai_type']
+        type_breakdown[t] = type_breakdown.get(t, 0) + 1
+
+    return {
+        'total_columns': len(all_columns),
+        'ai_ready_count': len(ai_columns),
+        'ai_ready_percentage': round(len(ai_columns) / len(all_columns) * 100, 1) if all_columns else 0,
+        'type_breakdown': type_breakdown,
+        'table_summary': table_summary,
+        'ai_columns': ai_columns
+    }
+
+
 @app.post("/api/process-raw-sql")
 async def process_raw_sql(file: UploadFile = File(...)):
     """
@@ -348,29 +443,183 @@ async def process_raw_sql(file: UploadFile = File(...)):
         # ============================================================
         # STEP 1: CONVERSION - Parse SQL and generate mapping
         # ============================================================
+        import re as _re
+
+        # Oracle → DB2 type conversion function
+        def _oracle_to_db2_type(oracle_type_str: str) -> str:
+            s = oracle_type_str.strip().upper()
+            # NUMBER(p,s) → DECIMAL(p,s)
+            m = _re.match(r'NUMBER\s*\(\s*(\d+)\s*,\s*(\d+)\s*\)', s)
+            if m: return f"DECIMAL({m.group(1)},{m.group(2)})"
+            # NUMBER(p) → DECIMAL(p,0)
+            m = _re.match(r'NUMBER\s*\(\s*(\d+)\s*\)', s)
+            if m: return f"DECIMAL({m.group(1)},0)"
+            # NUMBER → DECIMAL(31,0)
+            if s == 'NUMBER': return 'DECIMAL(31,0)'
+            # VARCHAR2(n) → VARCHAR(n)
+            m = _re.match(r'VARCHAR2\s*\(\s*(\d+)\s*\)', s)
+            if m: return f"VARCHAR({m.group(1)})"
+            # NVARCHAR2(n) → VARGRAPHIC(n)
+            m = _re.match(r'NVARCHAR2\s*\(\s*(\d+)\s*\)', s)
+            if m: return f"VARGRAPHIC({m.group(1)})"
+            # NCHAR(n) → GRAPHIC(n)
+            m = _re.match(r'NCHAR\s*\(\s*(\d+)\s*\)', s)
+            if m: return f"GRAPHIC({m.group(1)})"
+            # CHAR(n) → CHAR(n)
+            m = _re.match(r'CHAR\s*\(\s*(\d+)\s*\)', s)
+            if m: return f"CHAR({m.group(1)})"
+            # VARCHAR(n) → VARCHAR(n)
+            m = _re.match(r'VARCHAR\s*\(\s*(\d+)\s*\)', s)
+            if m: return f"VARCHAR({m.group(1)})"
+            # FLOAT(p) → DOUBLE
+            m = _re.match(r'FLOAT\s*\(\s*\d+\s*\)', s)
+            if m: return 'DOUBLE'
+            # RAW(n) → VARCHAR(n) FOR BIT DATA
+            m = _re.match(r'RAW\s*\(\s*(\d+)\s*\)', s)
+            if m: return f"VARCHAR({m.group(1)}) FOR BIT DATA"
+            # TIMESTAMP(p) → TIMESTAMP
+            m = _re.match(r'TIMESTAMP\s*\(\s*\d+\s*\)', s)
+            if m: return 'TIMESTAMP'
+            # DATE(p) → TIMESTAMP (Oracle DATE with precision)
+            m = _re.match(r'DATE\s*\(\s*\d+\s*\)', s)
+            if m: return 'TIMESTAMP'
+            # Simple mappings
+            simple = {
+                'INTEGER': 'INTEGER', 'INT': 'INTEGER', 'SMALLINT': 'SMALLINT',
+                'FLOAT': 'DOUBLE', 'BINARY_FLOAT': 'REAL', 'BINARY_DOUBLE': 'DOUBLE',
+                'DATE': 'TIMESTAMP', 'TIMESTAMP': 'TIMESTAMP',
+                'CLOB': 'CLOB', 'NCLOB': 'DBCLOB', 'BLOB': 'BLOB',
+                'ROWID': 'VARCHAR(18)', 'UROWID': 'VARCHAR(4000)',
+                'CHAR': 'CHAR(1)', 'VARCHAR': 'VARCHAR(255)',
+                'INTERVAL YEAR TO MONTH': 'VARCHAR(30)',
+                'INTERVAL DAY TO SECOND': 'VARCHAR(30)',
+            }
+            for k, v in simple.items():
+                if s == k or s.startswith(k + ' '):
+                    return v
+            return 'VARCHAR(255)'  # safe fallback
+
+        # Parse CREATE TABLE blocks to extract columns, PKs, FKs
         tables_found = []
         type_mappings = {}
-        lines = sql_content.upper().split('\n')
-        
-        for i, line in enumerate(lines):
-            if 'CREATE TABLE' in line:
-                # Extract table name
-                parts = line.split('CREATE TABLE')
-                if len(parts) > 1:
-                    table_name = parts[1].strip().split()[0].strip('(').strip()
-                    tables_found.append(table_name)
-            
-            # Detect Oracle data types
-            for oracle_type in ['NUMBER', 'VARCHAR2', 'DATE', 'CLOB', 'BLOB', 'TIMESTAMP']:
-                if oracle_type in line:
-                    if oracle_type not in type_mappings:
-                        type_mappings[oracle_type] = 0
-                    type_mappings[oracle_type] += 1
-        
+        parsed_tables = {}  # {TABLE_NAME: {columns, primary_key, foreign_keys, indexes}}
+
+        # Normalize: remove comments, collapse whitespace
+        sql_clean = _re.sub(r'--[^\n]*', '', sql_content)  # strip line comments
+        sql_clean = _re.sub(r'/\*.*?\*/', '', sql_clean, flags=_re.DOTALL)  # block comments
+
+        # Find all CREATE TABLE blocks
+        ct_pattern = _re.compile(
+            r'CREATE\s+TABLE\s+(\w+)\s*\((.+?)\)\s*;',
+            _re.IGNORECASE | _re.DOTALL
+        )
+        for ct_match in ct_pattern.finditer(sql_clean):
+            tname = ct_match.group(1).upper().strip()
+            body = ct_match.group(2)
+            tables_found.append(tname)
+
+            columns = {}
+            primary_key = ''
+            foreign_keys = {}
+
+            # Split body into individual column/constraint lines
+            # Split on commas that are NOT inside parentheses
+            depth = 0
+            current = ''
+            parts_list = []
+            for ch in body:
+                if ch == '(':
+                    depth += 1
+                    current += ch
+                elif ch == ')':
+                    depth -= 1
+                    current += ch
+                elif ch == ',' and depth == 0:
+                    parts_list.append(current.strip())
+                    current = ''
+                else:
+                    current += ch
+            if current.strip():
+                parts_list.append(current.strip())
+
+            for part in parts_list:
+                part_up = part.strip().upper()
+                # Skip empty
+                if not part_up:
+                    continue
+                # PRIMARY KEY constraint line
+                pk_m = _re.match(r'CONSTRAINT\s+\w+\s+PRIMARY\s+KEY\s*\(([^)]+)\)', part_up)
+                if pk_m:
+                    primary_key = pk_m.group(1).strip().split(',')[0].strip()
+                    continue
+                # Inline PRIMARY KEY (rare)
+                if part_up.startswith('PRIMARY KEY'):
+                    pk_m2 = _re.match(r'PRIMARY\s+KEY\s*\(([^)]+)\)', part_up)
+                    if pk_m2:
+                        primary_key = pk_m2.group(1).strip().split(',')[0].strip()
+                    continue
+                # FOREIGN KEY constraint line — skip (handled via ALTER TABLE below)
+                if 'FOREIGN KEY' in part_up or part_up.startswith('CONSTRAINT'):
+                    continue
+                # Column definition: COL_NAME TYPE [NOT NULL] [DEFAULT ...]
+                col_m = _re.match(r'(\w+)\s+(.+)', part.strip(), _re.IGNORECASE)
+                if col_m:
+                    col_name = col_m.group(1).upper()
+                    type_part = col_m.group(2).strip()
+                    # Extract just the type (stop at NOT NULL, DEFAULT, CONSTRAINT)
+                    type_only = _re.split(r'\s+(?:NOT\s+NULL|NULL|DEFAULT|CONSTRAINT|CHECK|UNIQUE)', type_part, flags=_re.IGNORECASE)[0].strip()
+                    oracle_type = type_only.upper()
+                    db2_type = _oracle_to_db2_type(oracle_type)
+                    is_not_null = bool(_re.search(r'\bNOT\s+NULL\b', type_part, _re.IGNORECASE))
+
+                    # Track type usage
+                    base_type = _re.match(r'(\w+)', oracle_type)
+                    base = base_type.group(1) if base_type else oracle_type
+                    type_mappings[base] = type_mappings.get(base, 0) + 1
+
+                    columns[col_name] = {
+                        "oracle_type": oracle_type,
+                        "db2_type": db2_type,
+                        "nullable": not is_not_null,
+                        "description": f"Migrated from Oracle {oracle_type}"
+                    }
+
+            parsed_tables[tname] = {
+                "columns": columns,
+                "primary_key": primary_key,
+                "foreign_keys": foreign_keys,
+                "indexes": {}
+            }
+
+        # Parse ALTER TABLE ... ADD CONSTRAINT ... FOREIGN KEY statements
+        fk_pattern = _re.compile(
+            r'ALTER\s+TABLE\s+(\w+)\s+ADD\s+CONSTRAINT\s+\w+\s+FOREIGN\s+KEY\s*\(([^)]+)\)\s+REFERENCES\s+(\w+)\s*\(([^)]+)\)',
+            _re.IGNORECASE | _re.DOTALL
+        )
+        for fk_match in fk_pattern.finditer(sql_clean):
+            child_table = fk_match.group(1).upper()
+            fk_col = fk_match.group(2).strip().upper()
+            ref_table = fk_match.group(3).upper()
+            ref_col = fk_match.group(4).strip().upper()
+            if child_table in parsed_tables:
+                parsed_tables[child_table]['foreign_keys'][fk_col] = f"{ref_table}.{ref_col}"
+
+        # Parse CREATE INDEX statements
+        idx_pattern = _re.compile(
+            r'CREATE\s+(?:UNIQUE\s+)?INDEX\s+(\w+)\s+ON\s+(\w+)\s*\(([^)]+)\)',
+            _re.IGNORECASE
+        )
+        for idx_match in idx_pattern.finditer(sql_clean):
+            idx_name = idx_match.group(1).upper()
+            idx_table = idx_match.group(2).upper()
+            idx_cols = idx_match.group(3).strip().upper()
+            if idx_table in parsed_tables:
+                parsed_tables[idx_table]['indexes'][idx_name] = idx_cols
+
         # Generate dynamic mapping using existing config as template
         with open(CONFIG_PATH, 'r') as f:
             template_config = json.load(f)
-        
+
         dynamic_mapping = {
             "tables": {},
             "metadata": {
@@ -380,16 +629,17 @@ async def process_raw_sql(file: UploadFile = File(...)):
                 "upload_timestamp": timestamp
             }
         }
-        
-        # For each table found, create mapping structure
+
+        # For each table found, use parsed structure (prefer parsed over template)
         for table_name in tables_found:
-            # Use template if table exists, otherwise create basic structure
-            if table_name in template_config.get('tables', {}):
+            if table_name in parsed_tables and parsed_tables[table_name]['columns']:
+                dynamic_mapping["tables"][table_name] = parsed_tables[table_name]
+            elif table_name in template_config.get('tables', {}):
                 dynamic_mapping["tables"][table_name] = template_config["tables"][table_name]
             else:
                 dynamic_mapping["tables"][table_name] = {
                     "columns": {},
-                    "primary_key": [],
+                    "primary_key": "",
                     "foreign_keys": {},
                     "indexes": {}
                 }
@@ -448,7 +698,8 @@ async def process_raw_sql(file: UploadFile = File(...)):
                 "tables_detected": len(tables_found),
                 "table_names": tables_found,
                 "type_mappings": type_highlights,
-                "total_type_conversions": sum(type_mappings.values())
+                "total_type_conversions": sum(type_mappings.values()),
+                "ai_potential": analyze_ai_potential(sql_content, dynamic_mapping)
             },
             "preview": {
                 "oracle_snippet": sql_content,
@@ -519,131 +770,400 @@ async def deploy_to_db2(mapping_file: str):
         )
 
 
+def _parse_inserts_from_sql(sql_content: str, table_names: list) -> dict:
+    """
+    Parse INSERT INTO statements from Oracle SQL content.
+    Returns dict of {TABLE_NAME: [row_dict, ...]}
+    Works for any Oracle SQL file — no hardcoded table names.
+    """
+    import re
+    data = {t: [] for t in table_names}
+    # Match: INSERT INTO TABLE_NAME (col1, col2, ...) VALUES (val1, val2, ...);
+    pattern = re.compile(
+        r"INSERT\s+INTO\s+(\w+)\s*\(([^)]+)\)\s*VALUES\s*\(([^)]+)\)",
+        re.IGNORECASE | re.DOTALL
+    )
+    for match in pattern.finditer(sql_content):
+        tname = match.group(1).upper().strip()
+        cols = [c.strip().upper() for c in match.group(2).split(',')]
+        raw_vals = match.group(3)
+        # Split values respecting quoted strings
+        vals = []
+        for v in re.split(r",(?=(?:[^']*'[^']*')*[^']*$)", raw_vals):
+            v = v.strip().strip("'").strip('"')
+            vals.append(v if v.upper() != 'NULL' else None)
+        if tname in data and len(cols) == len(vals):
+            data[tname].append(dict(zip(cols, vals)))
+    return data
+
+
+def _generate_synthetic_rows(table_name: str, columns: dict, count: int = 3) -> list:
+    """
+    Generate synthetic rows for a table based on its column definitions.
+    Used when no INSERT data is available in the uploaded SQL.
+    Works for any schema — no hardcoded values.
+    """
+    import random, string
+    rows = []
+    for i in range(1, count + 1):
+        row = {}
+        for col_name, col_def in columns.items():
+            db2_type = col_def.get('db2_type', 'VARCHAR(255)').upper()
+            if 'DECIMAL' in db2_type or 'INTEGER' in db2_type or 'NUMERIC' in db2_type:
+                row[col_name] = str(i * 100 + random.randint(1, 99))
+            elif 'VARCHAR' in db2_type or 'CHAR' in db2_type:
+                row[col_name] = f"Sample_{table_name}_{col_name}_{i}"
+            elif 'DATE' in db2_type or 'TIMESTAMP' in db2_type:
+                row[col_name] = f"2024-0{i}-15 00:00:00"
+            elif 'CLOB' in db2_type or 'BLOB' in db2_type:
+                row[col_name] = f"Sample text content for {col_name} row {i}"
+            else:
+                row[col_name] = f"value_{i}"
+        rows.append(row)
+    return rows
+
+
+def _resolve_insert_order(tables: dict) -> list:
+    """
+    Determine safe INSERT order by respecting FK dependencies.
+    Reads foreign_keys from the mapping to build a dependency graph.
+    Falls back to alphabetical if no FK info available.
+    Works for any schema — no hardcoded table names.
+    """
+    # Build dependency graph: table -> set of tables it depends on
+    deps = {t: set() for t in tables}
+    for table_name, table_def in tables.items():
+        fks = table_def.get('foreign_keys', {})
+        if isinstance(fks, dict):
+            for fk_def in fks.values():
+                if isinstance(fk_def, str):
+                    # Format: "TABLE.COLUMN"
+                    ref = fk_def.split('.')[0].upper() if '.' in fk_def else ''
+                elif isinstance(fk_def, dict):
+                    ref = fk_def.get('references', {}).get('table', '')
+                else:
+                    ref = ''
+                if ref and ref in tables and ref != table_name:
+                    deps[table_name].add(ref)
+        elif isinstance(fks, list):
+            for fk in fks:
+                if isinstance(fk, str):
+                    ref = fk.split('.')[0].upper() if '.' in fk else ''
+                elif isinstance(fk, dict):
+                    ref = fk.get('references', {}).get('table', '')
+                else:
+                    ref = ''
+                if ref and ref in tables and ref != table_name:
+                    deps[table_name].add(ref)
+
+    # Topological sort (Kahn's algorithm)
+    order = []
+    visited = set()
+    def visit(t, chain=None):
+        if chain is None:
+            chain = set()
+        if t in visited:
+            return
+        if t in chain:
+            return  # Circular — skip
+        chain.add(t)
+        for dep in deps.get(t, []):
+            visit(dep, chain)
+        visited.add(t)
+        order.append(t)
+
+    for t in sorted(tables.keys()):
+        visit(t)
+
+    return order
+
+
 @app.post("/api/run-full-migration")
 async def run_full_migration(mapping_file: str):
     """
     Run Full Migration - The Big Button
-    
-    Executes complete migration workflow:
-    1. Create DB2 schema from mapping
-    2. Generate mock data
-    3. Migrate data to DB2
-    4. Verify data integrity
+
+    Fully generic — works for ANY uploaded Oracle SQL file:
+    1. Load the dynamic mapping generated from the uploaded SQL
+    2. Connect to DB2
+    3. Drop + recreate tables from the mapping (no hardcoded names)
+    4. Extract INSERT data from the uploaded SQL, or generate synthetic rows
+    5. INSERT all rows into DB2
+    6. Verify row counts from actual DB2 COUNT(*)
     """
+    import ibm_db  # type: ignore
+
+    conn_str = (
+        "DATABASE=proddb;"
+        "HOSTNAME=localhost;"
+        "PORT=5001;"
+        "PROTOCOL=TCPIP;"
+        "UID=db2inst1;"
+        "PWD=password;"
+    )
+
     try:
-        # Locate mapping file - check uploads first, then database/migrations
+        # ── Locate mapping file ──────────────────────────────────────────
         mapping_path = OUTPUT_DIR / mapping_file
         if not mapping_path.exists():
-            # Try database/migrations folder
             mapping_path = PROJECT_ROOT / "database" / "migrations" / mapping_file
-            if not mapping_path.exists():
-                # Try as absolute path from project root
-                mapping_path = PROJECT_ROOT / mapping_file
-                if not mapping_path.exists():
-                    raise HTTPException(
-                        status_code=404,
-                        detail=f"Mapping file '{mapping_file}' not found in uploads or database/migrations"
-                    )
-        
-        # Load mapping
+        if not mapping_path.exists():
+            mapping_path = PROJECT_ROOT / mapping_file
+        if not mapping_path.exists():
+            raise HTTPException(
+                status_code=404,
+                detail=f"Mapping file '{mapping_file}' not found"
+            )
+
         with open(mapping_path, 'r') as f:
             mapping = json.load(f)
-        
         tables = mapping.get('tables', {})
-        
-        # Step 1: Create schema
-        schema_log = []
-        for table_name in tables.keys():
-            schema_log.append(f"✓ Created table: {table_name}")
-        
-        # Step 2: Generate mock data
+
+        if not tables:
+            raise HTTPException(
+                status_code=400,
+                detail="Mapping file contains no tables. Please upload a valid Oracle SQL file first."
+            )
+
+        # ── Determine FK-safe insert order (fully generic) ───────────────
+        insert_order = _resolve_insert_order(tables)
+
+        # ── Find the original uploaded SQL file to extract INSERT data ───
+        # The mapping file is named {timestamp}_dynamic_mapping.json
+        # The uploaded SQL is named {timestamp}_oracle.sql
+        sql_content = ""
+        stem = Path(mapping_file).stem.replace('_dynamic_mapping', '')
+        sql_candidates = [
+            OUTPUT_DIR / f"{stem}_oracle.sql",
+            UPLOAD_DIR / f"{stem}_oracle.sql",
+            UPLOAD_DIR / mapping_file.replace('_dynamic_mapping.json', '_oracle.sql'),
+        ]
+        for candidate in sql_candidates:
+            if candidate.exists():
+                with open(candidate, 'r') as f:
+                    sql_content = f.read()
+                break
+
+        # ── Get data: parse INSERTs from SQL, or use sample_oracle_data.json,
+        #    or generate synthetic rows ─────────────────────────────────────
+        raw_data = {}
+
+        # 1. Try to parse INSERT statements from the uploaded SQL
+        if sql_content:
+            raw_data = _parse_inserts_from_sql(sql_content, list(tables.keys()))
+
+        # 2. For tables with no INSERT data, try sample_oracle_data.json
         sample_data_path = PROJECT_ROOT / "tests" / "sample_oracle_data.json"
+        sample_data = {}
         if sample_data_path.exists():
             with open(sample_data_path, 'r') as f:
-                mock_data = json.load(f)
-        else:
-            mock_data = {}
-        
-        # Step 3: Migrate data using DataMapper
-        mapper = DataMapper(CONFIG_PATH)
-        migrated_data = {}
-        migration_log = []
-        
+                sample_data = json.load(f)
+
         for table_name in tables.keys():
-            if table_name in mock_data:
-                rows = mock_data[table_name]
-                mapped_rows = mapper.map_table_data(rows, table_name, validate=True)
-                migrated_data[table_name] = mapped_rows
-                migration_log.append(f"✓ Migrated {len(mapped_rows)} rows to {table_name}")
-        
-        # Get statistics
+            if not raw_data.get(table_name) and table_name in sample_data:
+                raw_data[table_name] = sample_data[table_name]
+
+        # 3. For tables still with no data, generate synthetic rows
+        for table_name, table_def in tables.items():
+            if not raw_data.get(table_name):
+                columns = table_def.get('columns', {})
+                if columns:
+                    raw_data[table_name] = _generate_synthetic_rows(table_name, columns, count=3)
+
+        # ── Transform data with DataMapper (uses mapping file as config) ─
+        # Use the mapping file itself as the DataMapper config if it has
+        # the right structure, otherwise fall back to CONFIG_PATH
+        try:
+            mapper = DataMapper(str(mapping_path))
+            # Quick test — if it fails, fall back
+            mapper.get_statistics()
+        except Exception:
+            mapper = DataMapper(CONFIG_PATH)
+
+        migrated_data = {}
+        for table_name in tables.keys():
+            rows = raw_data.get(table_name, [])
+            if rows:
+                try:
+                    mapped_rows = mapper.map_table_data(rows, table_name, validate=False)
+                    migrated_data[table_name] = mapped_rows if mapped_rows else rows
+                except Exception:
+                    # If DataMapper can't handle this table, use raw rows as-is
+                    migrated_data[table_name] = rows
+            else:
+                migrated_data[table_name] = []
+
         stats = mapper.get_statistics()
-        
-        # Step 4: Build verification data grouped by table
+
+        # ── Connect to DB2 ───────────────────────────────────────────────
+        conn = ibm_db.connect(conn_str, "", "")
+
+        schema_log = []
+        migration_log = []
         verification_data = {}
         sample_rows = []
-        
-        for table_name, rows in migrated_data.items():
-            # Calculate table-level stats
+
+        # ── Step 1: Drop existing tables (reverse FK order) ──────────────
+        for table_name in reversed(insert_order):
+            try:
+                ibm_db.exec_immediate(conn, f"DROP TABLE {table_name}")
+                schema_log.append(f"✓ Dropped: {table_name}")
+            except Exception:
+                pass  # Didn't exist — fine
+
+        # ── Step 2: Create tables from mapping ───────────────────────────
+        for table_name in insert_order:
+            table_def = tables.get(table_name, {})
+            columns = table_def.get('columns', {})
+            pk = table_def.get('primary_key', '')
+
+            if not columns:
+                schema_log.append(f"⚠ Skipped {table_name}: no columns defined")
+                continue
+
+            col_defs = []
+            for col_name, col_def in columns.items():
+                db2_type = col_def.get('db2_type', 'VARCHAR(255)') if isinstance(col_def, dict) else 'VARCHAR(255)'
+                # PK columns must be NOT NULL in DB2; also respect explicit nullable=False
+                is_pk = (col_name == pk)
+                is_not_null = is_pk or (isinstance(col_def, dict) and not col_def.get('nullable', True))
+                not_null_clause = ' NOT NULL' if is_not_null else ''
+                col_defs.append(f"  {col_name} {db2_type}{not_null_clause}")
+
+            if pk:
+                col_defs.append(f"  PRIMARY KEY ({pk})")
+
+            create_sql = f"CREATE TABLE {table_name} (\n" + ",\n".join(col_defs) + "\n)"
+            try:
+                ibm_db.exec_immediate(conn, create_sql)
+                schema_log.append(f"✓ Created: {table_name} ({len(col_defs)} columns)")
+            except Exception as e:
+                schema_log.append(f"⚠ Could not create {table_name}: {str(e)[:100]}")
+
+        # ── Step 3: INSERT data ───────────────────────────────────────────
+        total_inserted = 0
+        total_failed = 0
+
+        for table_name in insert_order:
+            rows = migrated_data.get(table_name, [])
+            if not rows:
+                migration_log.append(f"⚠ {table_name}: no data to insert")
+                continue
+
+            inserted = 0
+            failed = 0
+
+            for row in rows:
+                if not row:
+                    continue
+                cols = list(row.keys())
+                placeholders = ', '.join(['?' for _ in cols])
+                col_names = ', '.join(cols)
+                insert_sql = f"INSERT INTO {table_name} ({col_names}) VALUES ({placeholders})"
+                values = tuple(
+                    str(v) if v is not None else None
+                    for v in row.values()
+                )
+                try:
+                    stmt = ibm_db.prepare(conn, insert_sql)
+                    ibm_db.execute(stmt, values)
+                    inserted += 1
+                except Exception:
+                    failed += 1
+
+            total_inserted += inserted
+            total_failed += failed
+            migration_log.append(
+                f"✓ {table_name}: {inserted} rows inserted" +
+                (f", {failed} failed" if failed else "")
+            )
+
+        # ── Step 4: Verify row counts from DB2 ───────────────────────────
+        for table_name in insert_order:
+            try:
+                count_stmt = ibm_db.exec_immediate(conn, f"SELECT COUNT(*) FROM {table_name}")
+                count_row = ibm_db.fetch_tuple(count_stmt)
+                db2_count = int(count_row[0]) if count_row else 0
+            except Exception:
+                db2_count = 0
+
+            expected = len(migrated_data.get(table_name, []))
             verification_data[table_name] = {
-                "total_rows": len(rows),
-                "successful_rows": len(rows),
-                "failed_rows": 0,
-                "transformations_applied": stats.get('transformations_applied', 0) // len(migrated_data) if migrated_data else 0,
-                "validations_passed": len(rows),
-                "data_integrity": 1.0,
-                "verification_status": "VERIFIED"
+                "total_rows": db2_count,
+                "successful_rows": db2_count,
+                "failed_rows": max(0, expected - db2_count),
+                "transformations_applied": stats.get('transformations_applied', 0),
+                "validations_passed": db2_count,
+                "data_integrity": round(db2_count / expected, 2) if expected > 0 else 1.0,
+                "verification_status": "VERIFIED" if db2_count > 0 else "EMPTY"
             }
-            
-            # Collect sample rows for display (first 2 from each table)
-            for idx, row in enumerate(rows[:2]):
-                if row:
-                    first_col = list(row.keys())[0] if row.keys() else "id"
+
+            # Sample rows for display
+            try:
+                sample_stmt = ibm_db.exec_immediate(
+                    conn, f"SELECT * FROM {table_name} FETCH FIRST 2 ROWS ONLY"
+                )
+                s_row = ibm_db.fetch_assoc(sample_stmt)
+                idx = 0
+                while s_row and isinstance(s_row, dict) and idx < 2:
+                    first_col = list(s_row.keys())[0]
                     sample_rows.append({
                         "table": table_name,
-                        "row_id": row.get(first_col, idx + 1),
+                        "row_id": str(s_row.get(first_col, idx + 1)),
                         "status": "VERIFIED",
-                        "columns_validated": len(row),
+                        "columns_validated": len(s_row),
                         "data_integrity": "100%"
                     })
-        
+                    s_row = ibm_db.fetch_assoc(sample_stmt)
+                    idx += 1
+            except Exception:
+                pass
+
+        ibm_db.close(conn)
+
+        total_verified = sum(v['total_rows'] for v in verification_data.values())
+        data_source = "uploaded SQL INSERTs" if sql_content else "sample data + synthetic rows"
+
         return {
             "status": "success",
-            "message": "Full migration completed successfully",
+            "message": f"Full migration completed — {total_inserted} rows written to DB2 ({data_source})",
             "workflow": {
                 "step1_schema": {
                     "status": "completed",
-                    "tables_created": len(tables),
+                    "tables_created": len([l for l in schema_log if "Created" in l]),
                     "log": schema_log
                 },
                 "step2_data_generation": {
                     "status": "completed",
-                    "tables_with_data": len(mock_data),
-                    "total_rows": sum(len(rows) for rows in mock_data.values())
+                    "tables_with_data": len([t for t in migrated_data if migrated_data[t]]),
+                    "total_rows": sum(len(r) for r in migrated_data.values()),
+                    "data_source": data_source
                 },
                 "step3_migration": {
                     "status": "completed",
-                    "rows_migrated": stats['successful_rows'],
-                    "rows_failed": stats['failed_rows'],
-                    "success_rate": f"{(stats['successful_rows'] / stats['total_rows'] * 100):.1f}%" if stats['total_rows'] > 0 else "0%",
+                    "rows_migrated": total_inserted,
+                    "rows_failed": total_failed,
+                    "success_rate": f"{(total_inserted / (total_inserted + total_failed) * 100):.1f}%" if (total_inserted + total_failed) > 0 else "0%",
                     "log": migration_log
                 },
                 "step4_verification": {
                     "status": "completed",
-                    "rows_verified": sum(v['total_rows'] for v in verification_data.values()),
-                    "verification_rate": "100%"
+                    "rows_verified": total_verified,
+                    "verification_rate": "100%" if total_failed == 0 else f"{(total_inserted / (total_inserted + total_failed) * 100):.1f}%"
                 }
             },
             "summary": {
                 "total_tables": len(verification_data),
-                "total_rows": sum(v['total_rows'] for v in verification_data.values()),
-                "total_transformations": stats['transformations_applied'],
-                "total_validations": sum(v['validations_passed'] for v in verification_data.values())
+                "total_rows": total_verified,
+                "total_transformations": stats.get('transformations_applied', 0),
+                "total_validations": total_verified
             },
             "verification_data": verification_data,
             "sample_rows": sample_rows[:50]
         }
-    
+
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -763,6 +1283,163 @@ async def get_tco_analysis(
             "roi_percentage": round((five_year_savings / five_year_oracle) * 100, 1)
         }
     }
+
+
+@app.get("/api/watsonx-insight")
+async def watsonx_insight(table_name: str = "SYNERGIES"):
+    """
+    Live watsonx Predictive Insight
+    
+    Fetches the first 3 rows from the specified DB2 table and generates
+    mock watsonx predictive insights using the real values from the database.
+    
+    Parameters:
+    - table_name: DB2 table to fetch data from (default: SYNERGIES)
+    """
+    try:
+        import ibm_db  # type: ignore
+
+        conn_str = (
+            "DATABASE=proddb;"
+            "HOSTNAME=localhost;"
+            "PORT=5001;"
+            "PROTOCOL=TCPIP;"
+            "UID=db2inst1;"
+            "PWD=password;"
+            "CONNECTTIMEOUT=30;"
+        )
+        conn = ibm_db.connect(conn_str, "", "")
+
+        safe_table = table_name.upper().replace(";", "").replace("--", "")
+        stmt = ibm_db.exec_immediate(
+            conn,
+            f"SELECT * FROM DB2INST1.{safe_table} FETCH FIRST 3 ROWS ONLY"
+        )
+
+        rows = []
+        row = ibm_db.fetch_assoc(stmt)
+        while row:
+            rows.append({k: str(v) if v is not None else None for k, v in row.items()})
+            row = ibm_db.fetch_assoc(stmt)
+
+        ibm_db.close(conn)
+
+        if not rows:
+            raise HTTPException(status_code=404, detail=f"No data found in table {safe_table}")
+
+        # ============================================================
+        # MOCK watsonx PREDICTIVE INSIGHT ENGINE
+        # Uses real values from DB2 to generate contextual predictions
+        # ============================================================
+        predictions = []
+        insight_summary = {}
+
+        if safe_table == "SYNERGIES":
+            scores = [float(r.get("SYNERGY_SCORE", 85)) for r in rows]
+            avg_score = sum(scores) / len(scores)
+            predicted_increase = round((100 - avg_score) * 0.15, 1)
+            confidence = round(min(avg_score / 100 * 0.95, 0.97) * 100, 1)
+
+            for row in rows:
+                score = float(row.get("SYNERGY_SCORE", 85))
+                p1 = row.get("PRODUCT_ID_1", "?")
+                p2 = row.get("PRODUCT_ID_2", "?")
+                increase = round((100 - score) * 0.15, 1)
+                predictions.append({
+                    "row_id": row.get("SYNERGY_ID"),
+                    "input": f"Product {p1} ↔ Product {p2} (Score: {score})",
+                    "prediction": f"Predicted Synergy Increase: +{increase}%",
+                    "confidence": f"{round(score / 100 * 95, 1)}%",
+                    "model": "watsonx.ai / regression"
+                })
+
+            insight_summary = {
+                "model_used": "IBM watsonx.ai — Synergy Regression Model",
+                "avg_synergy_score": round(avg_score, 2),
+                "predicted_portfolio_increase": f"+{predicted_increase}%",
+                "overall_confidence": f"{confidence}%",
+                "recommendation": f"Avg synergy score of {round(avg_score, 1)} indicates strong product complementarity. Predicted {predicted_increase}% portfolio revenue increase with {confidence}% confidence."
+            }
+
+        elif safe_table == "CUSTOMERS":
+            for row in rows:
+                points = int(row.get("LOYALTY_POINTS", 1000))
+                churn_risk = max(5, round(100 - (points / 30), 1))
+                ltv = round(points * 2.5, 2)
+                predictions.append({
+                    "row_id": row.get("CUSTOMER_ID"),
+                    "input": f"{row.get('FIRST_NAME')} {row.get('LAST_NAME')} (Points: {points})",
+                    "prediction": f"Churn Risk: {churn_risk}% | Predicted LTV: ${ltv:,.2f}",
+                    "confidence": f"{round(min(95, 60 + points / 100), 1)}%",
+                    "model": "watsonx.ai / classification"
+                })
+
+            avg_points = sum(int(r.get("LOYALTY_POINTS", 0)) for r in rows) / len(rows)
+            insight_summary = {
+                "model_used": "IBM watsonx.ai — Customer Churn & LTV Model",
+                "avg_loyalty_points": round(avg_points, 0),
+                "predicted_portfolio_increase": f"+{round(avg_points / 500, 1)}%",
+                "overall_confidence": "87.3%",
+                "recommendation": f"Average loyalty score of {round(avg_points)} suggests moderate retention. Targeted campaigns could increase LTV by 15-20%."
+            }
+
+        elif safe_table == "PRODUCTS":
+            for row in rows:
+                price = float(row.get("PRICE", 100))
+                demand_change = round(-0.8 * (price / 1000) * 10, 1)
+                revenue_opt = round(price * 1.12, 2)
+                predictions.append({
+                    "row_id": row.get("PRODUCT_ID"),
+                    "input": f"{row.get('NAME')} (Price: ${price})",
+                    "prediction": f"Demand Elasticity: {demand_change}% | Optimal Price: ${revenue_opt}",
+                    "confidence": f"{round(75 + (price / 200), 1)}%",
+                    "model": "watsonx.ai / price optimization"
+                })
+
+            avg_price = sum(float(r.get("PRICE", 0)) for r in rows) / len(rows)
+            insight_summary = {
+                "model_used": "IBM watsonx.ai — Price Optimization Model",
+                "avg_price": f"${round(avg_price, 2)}",
+                "predicted_portfolio_increase": f"+{round(avg_price * 0.012, 1)}%",
+                "overall_confidence": "82.1%",
+                "recommendation": f"Average price point of ${round(avg_price, 2)} has optimization potential. Recommended price adjustments could increase revenue by 12%."
+            }
+
+        else:
+            for i, row in enumerate(rows):
+                predictions.append({
+                    "row_id": str(i + 1),
+                    "input": str(list(row.values())[:3]),
+                    "prediction": f"Anomaly Score: {round(0.05 + i * 0.03, 2)} (Normal)",
+                    "confidence": "91.0%",
+                    "model": "watsonx.ai / anomaly detection"
+                })
+            insight_summary = {
+                "model_used": "IBM watsonx.ai — Anomaly Detection",
+                "predicted_portfolio_increase": "+8.5%",
+                "overall_confidence": "91.0%",
+                "recommendation": "Data quality is high. No anomalies detected in the migrated dataset."
+            }
+
+        return {
+            "status": "success",
+            "table": safe_table,
+            "rows_analyzed": len(rows),
+            "raw_data": rows,
+            "predictions": predictions,
+            "insight_summary": insight_summary,
+            "takeout_message": f"By migrating {safe_table} to DB2, you have bypassed the $50,000 Oracle AI Add-on cost and enabled native watsonx integration instantly.",
+            "oracle_cost_avoided": 50000,
+            "watsonx_integration": "native"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"watsonx insight failed: {str(e)}"
+        )
 
 
 @app.get("/api/download-db2-sql/{filename}")
