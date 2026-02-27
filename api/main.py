@@ -5,6 +5,7 @@ Provides REST API endpoints for SQL conversion and migration
 
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 import sys
 from pathlib import Path
 import json
@@ -762,6 +763,50 @@ async def get_tco_analysis(
             "roi_percentage": round((five_year_savings / five_year_oracle) * 100, 1)
         }
     }
+
+
+@app.get("/api/download-db2-sql/{filename}")
+async def download_db2_sql(filename: str):
+    """
+    Download Generated DB2 SQL File
+    
+    Allows users to download the converted DB2 schema SQL file.
+    
+    Parameters:
+    - filename: Name of the DB2 SQL file to download
+    """
+    try:
+        # Check in outputs directory first
+        file_path = OUTPUT_DIR / filename
+        
+        # If not found, check uploads directory
+        if not file_path.exists():
+            file_path = UPLOAD_DIR / filename
+        
+        # If still not found, return 404
+        if not file_path.exists():
+            raise HTTPException(
+                status_code=404,
+                detail=f"File '{filename}' not found"
+            )
+        
+        # Return file as download
+        return FileResponse(
+            path=str(file_path),
+            filename=filename,
+            media_type='application/sql',
+            headers={
+                "Content-Disposition": f"attachment; filename={filename}"
+            }
+        )
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Download failed: {str(e)}"
+        )
 
 
 # Made with Bob
