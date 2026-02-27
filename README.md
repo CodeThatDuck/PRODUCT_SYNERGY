@@ -4,8 +4,10 @@
 
 ![IBM](https://img.shields.io/badge/IBM-DB2-blue)
 ![Python](https://img.shields.io/badge/Python-3.8+-green)
-![React](https://img.shields.io/badge/React-18+-blue)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-teal)
+![React](https://img.shields.io/badge/React-19+-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.133+-teal)
+![Vite](https://img.shields.io/badge/Vite-7.3+-purple)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.4+-cyan)
 
 ## 📋 Table of Contents
 
@@ -58,7 +60,7 @@
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    React Frontend                        │
-│              (Port 3001 - Vite Dev Server)              │
+│              (Port 3000 - Vite Dev Server)              │
 │  • Source Ingestion  • SQL Diff Viewer                  │
 │  • Migration & Data Audit  • TCO Calculator             │
 └────────────────────┬────────────────────────────────────┘
@@ -86,9 +88,9 @@
    python --version  # Should be 3.8 or higher
    ```
 
-2. **Node.js 16+** and **npm**
+2. **Node.js 18+** and **npm**
    ```bash
-   node --version  # Should be 16 or higher
+   node --version  # Should be 18 or higher
    npm --version
    ```
 
@@ -169,7 +171,7 @@ chmod +x start.sh
 
 ### Access the Application
 
-- **Frontend:** http://localhost:3001
+- **Frontend:** http://localhost:3000
 - **Backend API:** http://localhost:8000
 - **API Docs:** http://localhost:8000/docs
 
@@ -367,10 +369,11 @@ uvicorn api.main:app --reload --port 8001
 # Solution: Install Node.js from https://nodejs.org/
 ```
 
-**Problem:** Port 3001 already in use
+**Problem:** Port 3000 already in use
 ```bash
 # Solution: Kill process or use different port
 # Edit vite.config.js to change port
+lsof -ti:3000 | xargs kill -9
 ```
 
 ### Database Connection Issues
@@ -409,7 +412,8 @@ This project is proprietary software developed for IBM DB2 migration services.
 
 ## 👥 Authors
 
-- **Bob** - Senior Software Engineer
+- **Arth Soni** - Software Engineer
+- **Team Code-Your-Skills** - IBM
 
 ## 🙏 Acknowledgments
 

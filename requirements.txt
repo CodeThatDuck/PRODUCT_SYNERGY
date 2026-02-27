@@ -1,35 +1,43 @@
 # Project Synergy: Oracle to DB2 Migration Tool
-# Python Dependencies
+# Python Dependencies (pinned to actual installed versions)
 
 # ============================================
 # Core Web Framework
 # ============================================
-fastapi>=0.104.0
-uvicorn[standard]>=0.24.0
-python-multipart>=0.0.6
+fastapi==0.133.1
+uvicorn==0.41.0
+python-multipart==0.0.22
+starlette==0.52.1
+
+# ============================================
+# Data Validation
+# ============================================
+pydantic==2.12.5
+pydantic_core==2.41.5
+annotated-types==0.7.0
+typing_extensions==4.15.0
+typing-inspection==0.4.2
 
 # ============================================
 # Database Drivers
 # ============================================
-ibm_db>=3.1.0
+ibm_db==3.2.8
 
 # ============================================
-# HTTP & API
+# HTTP & Async
 # ============================================
-requests>=2.31.0
-httpx>=0.25.0
-
-# ============================================
-# Data Processing
-# ============================================
-# All data processing uses Python standard library
-# (json, pathlib, datetime, etc.)
+anyio==4.12.1
+h11==0.16.0
+idna==3.11
+click==8.3.1
 
 # ============================================
 # Development & Testing (Optional)
 # ============================================
 pytest>=7.4.0
 pytest-asyncio>=0.21.0
+httpx>=0.25.0
+requests>=2.31.0
 
 # ============================================
 # Code Quality (Optional)
