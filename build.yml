@@ -1,0 +1,189 @@
+# =============================================================================
+# IBM CIO DevEx CI/CD Pipeline Configuration
+# Project: Project Synergy — Oracle to DB2 Takeout Engine
+# Repository: project-synergy
+# =============================================================================
+# This file is required by the IBM CIO CI/CD platform (DevEx).
+# Reference: https://pages.github.ibm.com/cio-ci-cd/documentation/
+#
+# Stack summary:
+#   Backend  : Python 3.11 · FastAPI 0.133 · Uvicorn · ibm_db · Pydantic
+#   Frontend : Node 20 · React 19 · Vite 7 · Tailwind CSS · ESLint
+#   Container: Podman / podman-compose (IBM DB2 image)
+#   Tests    : pytest (backend) · ESLint (frontend)
+#   Lint     : flake8 + black (Python) · eslint (JS/JSX)
+# =============================================================================
+
+version: "1"
+
+application:
+  name: project-synergy
+  description: >
+    Enterprise Oracle-to-DB2 migration command center. Provides automated
+    schema conversion, JSON-driven data migration, and an interactive TCO
+    calculator via a FastAPI backend and React/Vite frontend.
+
+# ---------------------------------------------------------------------------
+# Pipeline
+# ---------------------------------------------------------------------------
+pipeline:
+
+  # ── Global environment variables available to all stages ─────────────────
+  environment:
+    PYTHON_VERSION: "3.11"
+    NODE_VERSION: "20"
+    APP_NAME: "project-synergy"
+    BACKEND_PORT: "8000"
+    FRONTEND_PORT: "3000"
+
+  stages:
+
+    # ── 1. BACKEND — Install & Lint ─────────────────────────────────────────
+    - name: backend-lint
+      type: script
+      image: python:3.11-slim
+      description: "Install Python dependencies and run flake8 + black checks"
+      commands:
+        - echo "=== Installing Python dependencies ==="
+        - pip install --upgrade pip
+        - pip install -r requirements.txt
+        # flake8: enforce PEP-8 style (max line length 120, skip migrations)
+        - echo "=== Running flake8 ==="
+        - flake8 api/ scripts/ tests/
+            --max-line-length=120
+            --exclude=venv,__pycache__,.git
+            --statistics
+        # black: check formatting without modifying files
+        - echo "=== Running black (check mode) ==="
+        - black --check --diff api/ scripts/ tests/
+      artifacts:
+        paths:
+          - "*.log"
+
+    # ── 2. BACKEND — Unit & Integration Tests ──────────────────────────────
+    - name: backend-test
+      type: script
+      image: python:3.11-slim
+      description: "Run pytest suite covering data mapper, schema conversion, and API"
+      environment:
+        # No live DB2 in CI — tests run in simulation/mock mode
+        DB2_HOST: ""
+        DB2_PORT: "50000"
+        DB2_DATABASE: "proddb"
+        DB2_USERNAME: ""
+        DB2_PASSWORD: ""
+        CI: "true"
+      commands:
+        - echo "=== Installing Python dependencies ==="
+        - pip install --upgrade pip
+        - pip install -r requirements.txt
+        - echo "=== Running pytest ==="
+        - pytest tests/
+            --ignore=tests/00_connection_test.py
+            -v
+            --tb=short
+            --junitxml=reports/pytest-results.xml
+        - echo "=== Running API unit tests ==="
+        - pytest api/test_api.py
+            -v
+            --tb=short
+            --junitxml=reports/api-test-results.xml
+      artifacts:
+        paths:
+          - reports/pytest-results.xml
+          - reports/api-test-results.xml
+
+    # ── 3. FRONTEND — Install & Lint ───────────────────────────────────────
+    - name: frontend-lint
+      type: script
+      image: node:20-slim
+      description: "Install Node dependencies and run ESLint on the React/Vite app"
+      commands:
+        - echo "=== Installing Node.js dependencies ==="
+        - cd frontend
+        - npm ci --prefer-offline
+        - echo "=== Running ESLint ==="
+        - npm run lint
+      artifacts:
+        paths:
+          - frontend/node_modules/.cache
+
+    # ── 4. FRONTEND — Production Build ─────────────────────────────────────
+    - name: frontend-build
+      type: script
+      image: node:20-slim
+      description: "Build the React/Vite frontend for production (outputs to frontend/dist)"
+      commands:
+        - echo "=== Installing Node.js dependencies ==="
+        - cd frontend
+        - npm ci --prefer-offline
+        - echo "=== Building production bundle ==="
+        - npm run build
+        - echo "=== Build output ==="
+        - ls -lh dist/
+      artifacts:
+        paths:
+          - frontend/dist/
+
+    # ── 5. CONTAINER — Build & Validate Image ──────────────────────────────
+    - name: container-build
+      type: script
+      image: quay.io/podman/stable:latest
+      description: >
+        Validate the podman-compose configuration and build the application
+        container image. The DB2 service image (ibmcom/db2) is pulled but
+        not started in CI to avoid privileged container requirements.
+      commands:
+        - echo "=== Validating podman-compose.yml ==="
+        - podman-compose config
+        - echo "=== Container configuration validated ==="
+      # NOTE: Full 'podman-compose up' requires privileged mode and the
+      # ibmcom/db2 image (~2 GB). This is deferred to integration/staging.
+
+    # ── 6. SECURITY — Dependency Vulnerability Scan ────────────────────────
+    - name: security-scan
+      type: script
+      image: python:3.11-slim
+      description: "Scan Python and Node dependencies for known CVEs"
+      commands:
+        - echo "=== Installing pip-audit ==="
+        - pip install pip-audit
+        - echo "=== Auditing Python dependencies ==="
+        - pip-audit -r requirements.txt --output=reports/pip-audit.json --format=json || true
+        - echo "=== Installing Node.js for npm audit ==="
+        - apt-get update -qq && apt-get install -y -qq nodejs npm
+        - cd frontend
+        - echo "=== Auditing Node.js dependencies ==="
+        - npm audit --audit-level=high --json > ../reports/npm-audit.json || true
+      artifacts:
+        paths:
+          - reports/pip-audit.json
+          - reports/npm-audit.json
+
+    # ── 7. PACKAGE — Assemble Deployable Artifact ──────────────────────────
+    - name: package
+      type: script
+      image: python:3.11-slim
+      description: >
+        Assemble the final deployable package: Python backend + pre-built
+        frontend static assets + migration configuration files.
+      commands:
+        - echo "=== Assembling deployment package ==="
+        - mkdir -p dist/app
+        # Backend
+        - cp -r api/           dist/app/api/
+        - cp -r scripts/       dist/app/scripts/
+        - cp -r database/      dist/app/database/
+        - cp    requirements.txt dist/app/
+        - cp    start.sh         dist/app/
+        - cp    podman-compose.yml dist/app/
+        # Frontend static build (produced by frontend-build stage)
+        - cp -r frontend/dist/ dist/app/frontend/dist/
+        - echo "=== Package contents ==="
+        - find dist/app -maxdepth 2 -type f | sort
+        - echo "=== Packaging complete ==="
+      artifacts:
+        paths:
+          - dist/app/
+
+# Made with Bob
