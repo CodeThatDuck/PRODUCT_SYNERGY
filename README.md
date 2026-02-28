@@ -23,7 +23,7 @@
 - [Testing](#testing)
 - [Troubleshooting](#troubleshooting)
 
-## ✨ Features
+## Features
 
 ### 🔄 **Automated Schema Conversion**
 - Converts Oracle SQL DDL to DB2-compatible SQL
