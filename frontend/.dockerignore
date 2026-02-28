@@ -1,0 +1,14 @@
+# Ignore node_modules — these will be installed fresh inside the container
+node_modules/
+
+# Ignore build output — not needed to build the image
+dist/
+
+# Ignore local environment files
+.env.local
+.env.*.local
+
+# Ignore editor and OS files
+.DS_Store
+*.log
+npm-debug.log*

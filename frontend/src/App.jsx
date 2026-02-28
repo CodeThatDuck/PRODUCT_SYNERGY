@@ -6,7 +6,7 @@ import { Bar } from 'react-chartjs-2';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = '';
 
 function App() {
   const [activeTab, setActiveTab] = useState('upload');

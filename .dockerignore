@@ -1,0 +1,28 @@
+# Ignore Python virtual environment — dependencies will be installed fresh inside the container
+venv/
+.venv/
+
+# Ignore frontend — backend container doesn't need it
+frontend/
+
+# Ignore Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Ignore test outputs and uploaded files
+uploads/
+outputs/
+tests/mapped_data_output.json
+
+# Ignore editor and OS files
+.DS_Store
+*.log
+.env
+.env.*
+
+# Ignore git files
+.git/
+.gitignore

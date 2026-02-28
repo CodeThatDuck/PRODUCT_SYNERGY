@@ -10,9 +10,6 @@ services:
     # Added extra capacity for DB2 to handle the Mac emulation
     shm_size: '256m' 
 
-    ports:
-      - "5001:50000"  # Map host port 5001 to container port 50000 (DB2 default)
-
     environment:
       LICENSE: accept
       DB2INSTANCE: db2inst1
@@ -26,6 +23,29 @@ services:
     volumes:
       - db2_data:/database
 
+    networks:
+      - product-synergy
+
+  backend:
+    build:
+      context: .                          # Build using Dockerfile in project root
+    platform: linux/amd64                 # Force x86 emulation — required for ibm_db on Apple Silicon Mac
+    container_name: product-synergy-backend
+    restart: unless-stopped
+    depends_on:
+      - db2                               # Wait for DB2 container to start first
+    networks:
+      - product-synergy
+
+  frontend:
+    build:
+      context: ./frontend                 # Build using frontend/Dockerfile
+    container_name: product-synergy-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"                       # Host port 3000 → Container port 3000 (same, easy to remember)
+    depends_on:
+      - backend                           # Wait for backend container to start first
     networks:
       - product-synergy
 

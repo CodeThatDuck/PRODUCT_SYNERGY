@@ -5,10 +5,11 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
+    host: '0.0.0.0',  // Allow connections from outside the container
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://product-synergy-backend:8000',
         changeOrigin: true,
       },
       '/database': {

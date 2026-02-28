@@ -895,8 +895,8 @@ async def run_full_migration(mapping_file: str):
 
     conn_str = (
         "DATABASE=proddb;"
-        "HOSTNAME=localhost;"
-        "PORT=5001;"
+        "HOSTNAME=product-synergy-db2;"  # DB2 container name on the shared podman network
+        "PORT=50000;"                     # DB2's internal port inside the container
         "PROTOCOL=TCPIP;"
         "UID=db2inst1;"
         "PWD=password;"
@@ -1301,8 +1301,8 @@ async def watsonx_insight(table_name: str = "SYNERGIES"):
 
         conn_str = (
             "DATABASE=proddb;"
-            "HOSTNAME=localhost;"
-            "PORT=5001;"
+            "HOSTNAME=product-synergy-db2;"  # DB2 container name on the shared podman network
+            "PORT=50000;"                     # DB2's internal port inside the container
             "PROTOCOL=TCPIP;"
             "UID=db2inst1;"
             "PWD=password;"
